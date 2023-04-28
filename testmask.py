@@ -8,6 +8,18 @@ matplotlib.use("QtAgg")
 from skimage.filters import gaussian
 from skimage.segmentation import active_contour
 
+
+
+
+"""
+
+THIS FILE IS FOR TESTING PURPOSES ONLY
+
+"""
+
+
+
+
 filename = "PAT_90_219_648"
 
 png = Image.open(".\\Medical_Imaging\\Images\\" + filename + ".png")
