@@ -102,6 +102,6 @@ def notmaskcreation(im):
   return
 
 if __name__ == "__main__":
-    im2mask('PAT_92_141_551')
-    plt.show()
-    print("Done!")
+  notmaskcreation('PAT_92_141_551')
+  plt.show()
+  print("Done!")
