@@ -11,7 +11,6 @@ from skimage.transform import resize
 import os
 #print(os.listdir('Images'))
 # Function to get us some example images and their masks, and resize them 
-
 def prepare_im(im_id):
 
   path = '.\\Medical_Imaging'
@@ -29,7 +28,7 @@ def prepare_im(im_id):
 # I do not call the masks ground truth here, because you can also measure features based on your own masks
 def notmaskcreation(im):
   im1, mask1 = prepare_im(im)
-#  im2, mask2 = prepare_im('PAT_92_141_551')
+  #im2, mask2 = prepare_im('PAT_92_141_551')
 
   plt.imshow(mask1, cmap='gray')
   #plt.imshow(mask2, cmap='gray')
