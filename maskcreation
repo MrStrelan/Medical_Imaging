@@ -1,0 +1,31 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage.color import rgb2gray
+from skimage import data
+
+from skimage.filters import gaussian
+from skimage.segmentation import active_contour
+
+file_im = 'Medical_Imaging\\Images\\PAT_92_141_551.png'
+
+def maskcreation(file_im):
+
+
+    
+    im = plt.imread(file_im)
+    im = rgb2gray(im)
+    im = im[0:1500,1000:2500]
+
+    #Resize for speed
+    from skimage.transform import resize
+    im = resize(im, (im.shape[0] // 4, im.shape[1] // 4),
+                        anti_aliasing=True)
+
+    im2 = gaussian(im, 3)
+    plt.imshow(im2, cmap="gray")
+
+
+
+    return
+
+maskcreation(file_im)
