@@ -100,7 +100,7 @@ def notmaskcreation(im):
 # Now we can measure as before by counting pixels in rows/columns...
   return
 
-if __name__ == "__Segmintation__":
-    #im2mask('PAT_92_141_551')
-    plt.show()
-    print("Done!")
+if __name__ == "__main__":
+  notmaskcreation('PAT_92_141_551')
+  plt.show()
+  print("Done!")
