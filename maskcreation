@@ -1,31 +1,55 @@
+from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
-from skimage import data
+
 
 from skimage.filters import gaussian
 from skimage.segmentation import active_contour
 
-file_im = 'Medical_Imaging\\Images\\PAT_92_141_551.png'
 
-def maskcreation(file_im):
+png = Image.open(".\\Medical_Imaging\\Images\\PAT_92_141_551.png")
+png.load() # required for png.split
+
+background = Image.new("RGB", png.size, (255, 255, 255))
+background.paste(png, mask=png.split()[3]) # 3 is the alpha channel 
+
+background.save('.\\Medical_Imaging\\ImagesJPG.jpg', 'JPEG', quality=80)
+
+im = rgb2gray(Image.open(".\\Medical_Imaging\\ImagesJPG\\PAT_92_141_551.jpg"))
 
 
-    
-    im = plt.imread(file_im)
-    im = rgb2gray(im)
-    im = im[0:1500,1000:2500]
+def snaking():
+    s = np.linspace(0, 2*np.pi, 400)   #Number of points on the circle
+    r = 100 + 100*np.sin(s)            #Row 
+    c = 220 + 100*np.cos(s)            #Column
+    init = np.array([r, c]).T
+    im2 = gaussian(im, 3, preserve_range=False)
 
-    #Resize for speed
-    from skimage.transform import resize
-    im = resize(im, (im.shape[0] // 4, im.shape[1] // 4),
-                        anti_aliasing=True)
+    plt.imshow(im2, cmap='gray')
+    snake = active_contour(im2, init)
 
-    im2 = gaussian(im, 3)
-    plt.imshow(im2, cmap="gray")
+    # Show 
+    fig, ax = plt.subplots(figsize=(7, 7))
+    ax.imshow(im, cmap=plt.cm.gray)
+    ax.plot(init[:, 1], init[:, 0], '--r', lw=3)
+    ax.plot(snake[:, 1], snake[:, 0], '-b', lw=3)
+    ax.set_xticks([]), ax.set_yticks([])
+    ax.axis([0, im.shape[1], im.shape[0], 0])
+
+    plt.show()
+
+    print(np.min(im2))
+    print(np.max(im2))
+
+
+    return
+
+
+def masking():
 
 
 
     return
 
-maskcreation(file_im)
+#snaking()
