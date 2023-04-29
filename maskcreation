@@ -10,7 +10,7 @@ import random
 from skimage.filters import gaussian
 from skimage.segmentation import active_contour
 
-#filename = "PAT_90_219_648"
+
 folderPNG = ".\\Medical_Imaging\\Images\\" #folder containing the png images
 folderJPG = ".\\Medical_Imaging\\ImagesJPG\\" #folder containing the jpg images
 
@@ -65,10 +65,12 @@ def snaking(im):
 
 def masking():
 
+    from skimage.draw import polygon
+
     im = rgb2gray(Image.open(".\\Medical_Imaging\\ImagesJPG\\" + randpicture(folderJPG)))
     im, snake = snaking(im)
 
-    from skimage.draw import polygon
+  
 
     # Create an empty image to add the mask to
     mask = np.zeros_like(im)
