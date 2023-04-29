@@ -1,0 +1,34 @@
+import csv
+  
+# Open file
+with open('Medical_Imaging/metadata.csv') as file_obj:
+      
+    # Skips the heading
+    # Using next() method
+    heading = next(file_obj)
+      
+    # Create reader object by passing the file 
+    # object to reader method
+    reader_obj = csv.reader(file_obj)
+    listscv = []  
+    diagnoses = []
+    # Iterate over each row in the csv file 
+    # using reader object
+    for row in reader_obj:
+        listscv.append(row)
+    
+ #   for row in reader_obj:
+  #      listscv.append(row[])
+
+print(len(listscv))
+agelist = []
+for el in listscv:
+    if el[17] not in diagnoses:
+        diagnoses.append(el[17])
+    agelist.append(el[6])
+print(max(agelist), min(agelist))
+#for i in listscv[17]:
+ #   if i not in diagnoses:
+ #       diagnoses.append(i)
+
+print(diagnoses)

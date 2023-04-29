@@ -4,22 +4,37 @@ import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
 import matplotlib
 matplotlib.use("QtAgg")
+import os
+import random
+
 from skimage.filters import gaussian
 from skimage.segmentation import active_contour
 
-filename = "PAT_90_219_648"
 
-png = Image.open(".\\Images\\" + filename + ".png")
-png.load() # required for png.split
+folderPNG = ".\\Medical_Imaging\\Images\\" #folder containing the png images
+folderJPG = ".\\Medical_Imaging\\ImagesJPG\\" #folder containing the jpg images
 
-background = Image.new("RGB", png.size, (255, 255, 255))
+def pngtojpeg(): #converts all pngs in a folder to jpgs
 
-#removing alpha channel by converting from png to jpg
-background.paste(png, mask=png.split()[3]) # 3 is the alpha channel 
+    for filename in os.listdir(folderPNG):
+        png = Image.open(folderPNG + filename)
+        png.load() # required for png.split
 
-background.save('.\\ImagesJPG\\' + filename + '.jpg', 'JPEG', quality=80)
+        background = Image.new("RGB", png.size, (255, 255, 255))
+        background.paste(png, mask=png.split()[3]) # 3 is the alpha channel 
 
-im = rgb2gray(Image.open(".\\ImagesJPG\\" + filename + ".jpg"))
+        filename = filename[:-4] #removes the .png from the filename
+        background.save(folderJPG + filename + '.jpg', 'JPEG', quality=80)
+
+    return print("All pngs in the folder have been converted to jpgs")
+
+
+def randpicture(folder): #for the sake of testing other photos with ease
+    filename = random.choice(os.listdir(folder))
+    return filename
+
+
+im = rgb2gray(Image.open(".\\Medical_Imaging\\ImagesJPG\\" + randpicture(folderJPG)))
 
 def snaking(im):
     # Resize for speed and bloor to blend the collor
@@ -49,10 +64,13 @@ def snaking(im):
 
 
 def masking():
-    im = rgb2gray(Image.open(".\\ImagesJPG\\" + filename + ".jpg"))
-    im, snake = snaking(im)
 
     from skimage.draw import polygon
+
+    im = rgb2gray(Image.open(".\\Medical_Imaging\\ImagesJPG\\" + randpicture(folderJPG)))
+    im, snake = snaking(im)
+
+  
 
     # Create an empty image to add the mask to
     mask = np.zeros_like(im)

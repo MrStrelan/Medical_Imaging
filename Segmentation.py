@@ -1,10 +1,3 @@
-# Get repo, prepare some images
-
-#if False:      
-#  !rm -rf fyp2022-imaging
-#  !git clone https://github.com/vcheplygina/fyp2022-imaging.git
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import transform, morphology
