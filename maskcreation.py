@@ -86,5 +86,6 @@ def masking():
 
     return
 
+pngtojpeg()
 
 
