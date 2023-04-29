@@ -4,24 +4,25 @@ import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
 import matplotlib
 matplotlib.use("QtAgg")
-
 from skimage.filters import gaussian
 from skimage.segmentation import active_contour
 
 filename = "PAT_90_219_648"
 
-png = Image.open(".\\Medical_Imaging\\Images\\" + filename + ".png")
+png = Image.open(".\\Images\\" + filename + ".png")
 png.load() # required for png.split
 
 background = Image.new("RGB", png.size, (255, 255, 255))
+
+#removing alpha channel by converting from png to jpg
 background.paste(png, mask=png.split()[3]) # 3 is the alpha channel 
 
-background.save('.\\Medical_Imaging\\ImagesJPG\\' + filename + '.jpg', 'JPEG', quality=80)
+background.save('.\\ImagesJPG\\' + filename + '.jpg', 'JPEG', quality=80)
 
-im = rgb2gray(Image.open(".\\Medical_Imaging\\ImagesJPG\\" + filename + ".jpg"))
+im = rgb2gray(Image.open(".\\ImagesJPG\\" + filename + ".jpg"))
 
 def snaking(im):
-    # Resize for speed
+    # Resize for speed and bloor to blend the collor
     im = gaussian(im, 3)
     
     # Find the darkest spot in the image
@@ -48,7 +49,7 @@ def snaking(im):
 
 
 def masking():
-    im = rgb2gray(Image.open(".\\Medical_Imaging\\ImagesJPG\\" + filename + ".jpg"))
+    im = rgb2gray(Image.open(".\\ImagesJPG\\" + filename + ".jpg"))
     im, snake = snaking(im)
 
     from skimage.draw import polygon

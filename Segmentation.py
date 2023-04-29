@@ -8,9 +8,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import transform, morphology
-import os
-#print(os.listdir('Images'))
-# Function to get us some example images and their masks, and resize them 
 
 
 def prepare_im(im_id):
@@ -28,90 +25,65 @@ def prepare_im(im_id):
 
 
 # I do not call the masks ground truth here, because you can also measure features based on your own masks
-def notmaskcreation(im):
-  im1, mask1 = prepare_im(im)
-  #im2, mask2 = prepare_im('PAT_92_141_551')
+def notmaskcreation(img):
+  my_img, img_msk = prepare_im(img)
 
-  plt.imshow(mask1, cmap='gray')
-  #plt.imshow(mask2, cmap='gray')
+
+  plt.imshow(img_msk, cmap='gray')
 
   #Total size of the image
-  total = mask1.shape[0] * mask1.shape[1] 
+  area_img = img_msk.shape[0] * img_msk.shape[1] 
 
   #Size of mask only
-  area = np.sum(mask1)
+  area = np.sum(img_msk)
 
-  #As percentage
-  print("Cancer percentage:",area/total*100)
-
-  #How many 1's in each column of the image (sum over axis 0, i.e. rows)
-  pixels_in_col = np.sum(mask1, axis=0)
-
-  #Without this there are some non zeros and ones still because of the resizing
-  pixels2 = pixels_in_col > 0
-  pixels2 = pixels2.astype(np.int8)
-
-  #print(pixels2)
-
-  max_pixels_in_col = np.max(pixels_in_col)
-  print('height is', max_pixels_in_col) 
+  #Area of mole as percentage
+  print("Cancer percentage:", area/area_img*100)
   
-  mask1, max_width = features(mask1)
-  print("Max width:", max_width)
+  img_msk, height = max_height(img_msk)
+  print("Max height:", height)
 
-  # General rule of thumb - create a simpler image first, then do the measurement
+  #Making mask without perimeter
+  print(perimeter(img_msk))
 
-  from skimage import transform
-  rot_im = transform.rotate(mask1, 45)
-  plt.imshow(rot_im, cmap='gray')
-
-  from skimage import morphology
-
-  #Structural element, that we will use as a "brush" on our mask
-  struct_el = morphology.disk(3)
-
-  # Use this "brush" to erode the image - eat away at the borders
-  mask_eroded = morphology.binary_erosion(mask1, struct_el)
-
-  # Show side by side (depending on brush size, you might not see a difference visually)
-  fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
-  axes[0].imshow(mask1, cmap='gray')
-  axes[1].imshow(mask_eroded, cmap='gray') #This one has accidental pixels removed. Consider using it
-  fig.tight_layout()
-
-  # Verify the new mask is smaller
-  #print(area)
-  #print(np.sum(mask_eroded))
-
-  # Now we can find the pixels that have value 1 in the original mask but not in the eroded mask
-
-  perimeter_im = mask1 - mask_eroded
-
-  plt.imshow(perimeter_im, cmap='gray')
-  print("Pixels of perimiter:", np.sum(perimeter_im))
-
-
-
-# Now we can measure as before by counting pixels in rows/columns...
   return
 
-#Takes mask of the image, return maximum width and rotated mask
-def max_width(img_msk):
 
+#max_height Takes mask of the image, return maximum height and rotated mask
+def max_height(img_msk):
+  
   pixels_in_col = np.sum(img_msk, axis=0)
 
   #finding largest width
-  max_pixels_in_col = np.max_pixels_in_col
+  max_pixels_in_col = np.max(pixels_in_col)
 
   #Rotates mask by 45 degrees until finds largest width
   for i in range(1,8):
+
       rot_mask = transform.rotate(img_msk, 45*i)
-      width = np.max(np.sum(rot_mask, axis=0))
-      if width > max_pixels_in_col:
-          max_pixels_in_col = width
+      height = np.max(np.sum(rot_mask, axis=0))
+      if height > max_pixels_in_col:
+          max_pixels_in_col = height
           final_msk = rot_mask
+
   return final_msk, max_pixels_in_col
     
+def perimeter(img_msk):
+    #brush saves this shape:
+    #[[0 0 0 1 0 0 0]
+    # [0 1 1 1 1 1 0]
+    # [0 1 1 1 1 1 0]
+    # [1 1 1 1 1 1 1]
+    # [0 1 1 1 1 1 0]
+    # [0 1 1 1 1 1 0]
+    # [0 0 0 1 0 0 0]]
+    brush = morphology.disk(1)
+
+    mask_cleaned = morphology.binary_erosion(img_msk, brush)
+
+    perimeter_im = img_msk - mask_cleaned
+
+    return perimeter_im
 
 if __name__ == "__main__":
   notmaskcreation('PAT_92_141_551')
