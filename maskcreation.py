@@ -37,7 +37,7 @@ def randpicture(folder): #for the sake of testing other photos with ease
 im = rgb2gray(Image.open(".\\Medical_Imaging\\ImagesJPG\\" + randpicture(folderJPG)))
 
 def snaking(im):
-    # Resize for speed
+    # Resize for speed and bloor to blend the collor
     im = gaussian(im, 3)
     
     # Find the darkest spot in the image
