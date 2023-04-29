@@ -7,7 +7,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import transform
+from skimage import transform, morphology
 import os
 #print(os.listdir('Images'))
 # Function to get us some example images and their masks, and resize them 
