@@ -1,0 +1,74 @@
+import matplotlib.image as img
+import matplotlib.pyplot as plt
+from scipy.cluster.vq import whiten
+from scipy.cluster.vq import kmeans
+import pandas as pd
+from maskcreation import randpicture
+
+from PIL import Image
+
+
+"""
+As for the moment this functions ouput the dominant color of the image. It seems to be incorrect.
+"""
+
+folderJPG = ".\\Medical_Imaging\\ImagesJPG\\"
+sumpicture = randpicture(folderJPG)
+def batmanMethod():
+	batman_image = img.imread(folderJPG + "PAT_90_219_648.jpg")
+	print(sumpicture)
+
+	r = []
+	g = []
+	b = []
+	for row in batman_image:
+		for temp_r, temp_g, temp_b in row:
+			r.append(temp_r)
+			g.append(temp_g)
+			b.append(temp_b)
+
+	batman_df = pd.DataFrame({'red' : r,
+							'green' : g,
+							'blue' : b})
+
+	batman_df['scaled_color_red'] = whiten(batman_df['red'])
+	batman_df['scaled_color_blue'] = whiten(batman_df['blue'])
+	batman_df['scaled_color_green'] = whiten(batman_df['green'])
+
+	cluster_centers, _ = kmeans(batman_df[['scaled_color_red',
+										'scaled_color_blue',
+										'scaled_color_green']], 3)
+
+	dominant_colors = []
+
+	red_std, green_std, blue_std = batman_df[['red',
+											'green',
+											'blue']].std()
+
+	for cluster_center in cluster_centers:
+		red_scaled, green_scaled, blue_scaled = cluster_center
+		dominant_colors.append((
+			red_scaled * red_std / 255,
+			green_scaled * green_std / 255,
+			blue_scaled * blue_std / 255
+		))
+
+	plt.imshow([dominant_colors])
+	plt.show()
+	return
+
+
+def find_dominant_color(filename):
+    #Resizing parameters
+    width, height = 150, 150
+    image = Image.open(filename)
+    image = image.resize((width, height), resample = 0)
+    #Get colors from image object
+    pixels = image.getcolors(width * height)
+    #Sort them by count number(first element of tuple)
+    sorted_pixels = sorted(pixels, key=lambda t: t[0])
+    #Get the most frequent color
+    dominant_color = sorted_pixels[-1][1]
+    return dominant_color
+
+print(find_dominant_color(folderJPG + sumpicture))

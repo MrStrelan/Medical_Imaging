@@ -22,13 +22,58 @@ with open('Medical_Imaging/metadata.csv') as file_obj:
 
 print(len(listscv))
 agelist = []
-for el in listscv:
-    if el[17] not in diagnoses:
-        diagnoses.append(el[17])
-    agelist.append(el[6])
-print(max(agelist), min(agelist))
+
+diagnoselist = ['NEV', 'BCC', 'ACK', 'SEK', 'SCC', 'MEL']
+def diagnosecount():
+    diagnosecount = [0, 0, 0, 0, 0, 0]
+    #[244, 845, 730, 235, 192, 52]
+
+    for el in listscv:
+        if el[17] == 'NEV':
+            diagnosecount[0] += 1
+        elif el[17] == 'BCC':
+            diagnosecount[1] += 1
+        elif el[17] == 'ACK':
+            diagnosecount[2] += 1
+        elif el[17] == 'SEK':
+            diagnosecount[3] += 1
+        elif el[17] == 'SCC':
+            diagnosecount[4] += 1
+        elif el[17] == 'MEL':
+            diagnosecount[5] += 1
+    return diagnosecount
+
+#I need to create a circular diagram plot of the diagnoses and their counts
+
+def diagnoselist():
+    for el in listscv:
+        if el[17] not in diagnoses:
+            diagnoses.append(el[17])
+        agelist.append(el[6])
+    return diagnoses
+
+#print(max(agelist), min(agelist))
 #for i in listscv[17]:
  #   if i not in diagnoses:
  #       diagnoses.append(i)
 
 print(diagnoses)
+print(diagnosecount())
+
+import matplotlib.pyplot as plt
+
+diagnoses = ['NEV', 'BCC', 'ACK', 'SEK', 'SCC', 'MEL']
+counts = diagnosecount()
+
+def make_autopct(values):
+    def my_autopct(pct):
+        total = sum(values)
+        val = int(round(pct*total/100.0))
+        return '{v:d}'.format(v=val)
+    return my_autopct
+
+fig1, ax1 = plt.subplots()
+ax1.pie(counts, labels=diagnoses, autopct=make_autopct(counts), startangle=90)
+ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+plt.show()
