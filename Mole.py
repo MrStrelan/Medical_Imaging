@@ -58,4 +58,15 @@ class Mole:
     # Method that displays the calculated perimeter
     def show_per(self):
         plt.imshow(self.perim, cmap='gray')
-        plt.show()```
+        plt.show()
+        
+    def mask_segm(self,im, gt):
+        # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+        # axes[0].imshow(im)
+        # axes[1].imshow(gt, cmap='gray')
+        #fig.tight_layout()
+        im2 = im.copy()
+        im2[gt==0] = 0
+        # Display 
+        plt.imshow(im2)
+        plt.show()
