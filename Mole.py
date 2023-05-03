@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import transform, morphology
 import cv2
+import os
 
 # A class for processing mole images
 class Mole:
@@ -17,7 +18,9 @@ class Mole:
         # Calculate the mole's symmetry
         self.symmetry = self.symmetry_detection("perimeter.png")
 
-        
+    # Method that detects symmetry in the mole
+        # Fuse the mask and the original picture
+        self.seg = self.mask_segm(self.img,self.mask,image_id)
 
     # Method that loads and prepares image and mask for further processing
     # Input: image id
@@ -130,16 +133,18 @@ class Mole:
             print("Object is not symmetric:", std_distance)
         return
 
-
     def mask_segm(self,im, gt):
         # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
         # axes[0].imshow(im)
         # axes[1].imshow(gt, cmap='gray')
         #fig.tight_layout()
         im2 = im.copy()
-        im2[gt==0] = 0
+        im2[mask==0] = 0
+        # Save the resulting image in a folder called "results"
+        path = '.\\Medical_Imaging'
         # Display 
         plt.imshow(im2)
+        plt.imsave(path + '\\Fused_Images\\' + image_id + '_segm.png',im2)
         plt.show()
    
 """
