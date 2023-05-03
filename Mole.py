@@ -16,7 +16,7 @@ class Mole:
         # Convert to binary
         self.conv = self.binary_converter(self.mask)
         # Calculate the mole's symmetry
-        self.sym = self.symmetry_detection(self.conv)
+        self.sym = self.symmetry_detection()
 
     # Method that loads and prepares image and mask for further processing
     # Input: image id
@@ -82,7 +82,7 @@ class Mole:
 
     def symmetry_detection(self):
         # Convert binary image into an array of 2D points
-        points = cv2.findNonZero(self)
+        points = cv2.findNonZero(self.conv)
         print(points)
         # Find the bounding rectangle of the points
         x, y, w, h = cv2.boundingRect(points)
