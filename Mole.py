@@ -16,7 +16,7 @@ class Mole:
         # Convert to binary
         self.conv = self.binary_converter(self.mask)
         # Calculate the mole's symmetry
-        self.sym = self.symmetry_detection()
+        self.sym = self.symmetry_detection(self.conv)
         
 
     # Method that loads and prepares image and mask for further processing
@@ -29,7 +29,7 @@ class Mole:
         im = plt.imread(path + "\\Images\\" + im_id + '.png')
         im = transform.resize(im, (im.shape[0] // 4, im.shape[1] // 4), anti_aliasing=True)
         # Load mask and scale it down by a factor of 4
-        gt = plt.imread(path + '\\Masks_png\\' + im_id + '.png')
+        gt = plt.imread(path + '\\Masks_png\\' + "mask_"+ im_id + '.png')
         gt = transform.resize(gt, (gt.shape[0] // 4, gt.shape[1] // 4), anti_aliasing=False) #Setting it to True creates values that are not 0 or 1
         return im, gt
 
@@ -78,12 +78,30 @@ class Mole:
     
     def binary_converter(self, img_msk):
         # Convert the image to binary
-        ret, thresh = cv2.threshold(img_msk, 127, 255, 0)
+        ret, thresh = cv2.threshold(img_msk, 127, 255, cv2.THRESH_BINARY)
+        print("here it is:", ret, thresh)
         return thresh
 
-    def symmetry_detection(self.conv):
+    def symmetry_detection(self, conv):
+
+
+        image = Image.open(conv)
+
+    # Convert the image to black and white
+        image = image.convert("1")
+
+        # Get the pixel values as a matrix of 0s and 1s
+        matrix = list(image.getdata())
+        matrix = [matrix[i:i+image.width] for i in range(0, len(matrix), image.width)]
+
+        # Print the matrix
+       
+
+
+
+
         # Convert binary image into an array of 2D points
-        points = cv2.findNonZero(self.conv)
+        points = cv2.findNonZero(conv)
         print(points)
         # Find the bounding rectangle of the points
         x, y, w, h = cv2.boundingRect(points)
