@@ -83,9 +83,9 @@ class Mole:
         ret, thresh = cv2.threshold(img_msk, 127, 255, 0)
         return thresh
 
-    def symmetry_detection(self):
+    def symmetry_detection(self.conv):
         # Convert binary image into an array of 2D points
-        points = cv2.findNonZero(self)
+        points = cv2.findNonZero(self.conv)
         print(points)
         # Find the bounding rectangle of the points
         x, y, w, h = cv2.boundingRect(points)
