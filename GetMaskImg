@@ -1,0 +1,18 @@
+import os
+
+datafolder = "C:\\Users\\mrass\\Downloads\\Uni_pics"
+
+maskfolder = ".\\Medical_Imaging\\Masks_png"
+destinationfolder = ".\\Medical_Imaging\\Images"
+
+for maskname in os.listdir(maskfolder):
+    for picname in os.listdir(datafolder):
+        if maskname[5:] == picname:
+            try:
+                os.rename(datafolder + "\\" + picname, destinationfolder + "\\" + picname)
+                print("renamed" + picname)
+            except FileExistsError:
+                print("Duplicate")
+                continue
+        else:
+            print ("No match found for " + picname)
