@@ -12,11 +12,11 @@ class Mole:
         self.mask, self.high = self.max_height(self.mask)
         # Calculate the mole's perimeter
         self.perim = self.perimeter(self.mask)
-
-        # Convert to binary
-        self.conv = self.binary_converter(self.mask)
+        # Save the perimeter image
+        plt.imsave("perimeter.png", self.perim, format = 'png', cmap='gray')
         # Calculate the mole's symmetry
-        self.sym = self.symmetry_detection(self.conv)
+        self.symmetry = self.symmetry_detection("perimeter.png")
+
         
 
     # Method that loads and prepares image and mask for further processing
@@ -57,7 +57,7 @@ class Mole:
         # Define a brush shape for erosion
         brush = morphology.disk(2)
 
- #brush saves this shape:
+        #brush saves this shape:
         #[[0 0 1 0 0]
          #[0 1 1 1 0]
          #[1 1 1 1 1]
@@ -70,62 +70,66 @@ class Mole:
         perimeter_im = img_msk - mask_cleaned
         return perimeter_im
 
+
+
     # Method that displays the calculated perimeter
     def show_per(self):
         
         plt.imshow(self.perim, cmap='gray')
         plt.show()
     
-    def binary_converter(self, img_msk):
-        # Convert the image to binary
-        ret, thresh = cv2.threshold(img_msk, 127, 255, cv2.THRESH_BINARY)
-        print("here it is:", ret, thresh)
-        return thresh
+    # Method that detects symmetry in the mole
+    def symmetry_detection(self, img_perim):
+        # Load the grayscale image
+        img_gray = cv2.imread(img_perim, cv2.IMREAD_GRAYSCALE)
+        print(img_gray)
+        # Threshold the image to create a binary image
+        ret, img_binary = cv2.threshold(img_gray, 200, 255, cv2.THRESH_BINARY)
+        print(img_binary, ret)
+        # Find the contours in the binary image
+        contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    def symmetry_detection(self, conv):
+        # Calculate the centroid of the object
+        M = cv2.moments(contours[0])
+        #print(M)
+        cx = int(M['m10'] / M['m00'])
+        cy = int(M['m01'] / M['m00'])
 
+        # Find the distance between each point in the contour and the centroid
+        distances = []
+        for point in contours[0]:
+            px, py = point[0]
+            distance = np.sqrt((px - cx)**2 + (py - cy)**2)
+            distances.append(distance)
+        mean_distance = sum(distances) / len(distances)
+        # Find the corresponding points on the other side of the centroid
+        corresponding_points = []
+        for point in contours[0]:
+            px, py = point[0]
+            distance = np.sqrt((px - cx)**2 + (py - cy)**2)
+            dx = int(cx + (cx - px) / distance * mean_distance)
+            dy = int(cy + (cy - py) / distance * mean_distance)
+            corresponding_points.append((dx, dy))
 
-        image = Image.open(conv)
+        # Calculate the distances between the pairs of corresponding points
+        pair_distances = []
+        for i in range(len(contours[0])):
+            px, py = contours[0][i][0]
+            qx, qy = corresponding_points[i]
+            distance = np.sqrt((px - qx)**2 + (py - qy)**2)
+            pair_distances.append(distance)
 
-    # Convert the image to black and white
-        image = image.convert("1")
+        # Calculate the mean and standard deviation of the distances
+        mean_distance = np.mean(pair_distances)
+        std_distance = np.std(pair_distances)
 
-        # Get the pixel values as a matrix of 0s and 1s
-        matrix = list(image.getdata())
-        matrix = [matrix[i:i+image.width] for i in range(0, len(matrix), image.width)]
-
-        # Print the matrix
-       
-
-
-
-
-        # Convert binary image into an array of 2D points
-        points = cv2.findNonZero(conv)
-        print(points)
-        # Find the bounding rectangle of the points
-        x, y, w, h = cv2.boundingRect(points)
-        print(x,y,w,h)
-        # Crop the binary image using the bounding rectangle
-        thresh_square = self.conv[y:y+h, x:x+w]
-
-        # Reduce the image to 1D arrays
-        G_X = cv2.reduce(thresh_square, 0, cv2.REDUCE_SUM)
-        G_Y = cv2.reduce(thresh_square, 1, cv2.REDUCE_SUM)
-
-        # Normalize the histograms
-        G_X = cv2.normalize(G_X, G_X, 0, 1, cv2.NORM_MINMAX)
-        G_Y = cv2.normalize(G_Y, G_Y, 0, 1, cv2.NORM_MINMAX)
-
-        # Compare histograms using correlation distance
-        compare_val = cv2.compareHist(G_X, G_Y, cv2.HISTCMP_CORREL)
-
-        # Threshold to separate symmetric and asymmetric objects
-        if compare_val > 0.9:
-            print("Symmetric object detected!")
+        # Check if the object is symmetric
+        if std_distance < 10:
+            print("Object is symmetric:", std_distance)
         else:
-            print("Asymmetric object detected!")
+            print("Object is not symmetric:", std_distance)
         return
+
 
     def mask_segm(self,im, gt):
         # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))

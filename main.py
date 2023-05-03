@@ -2,12 +2,13 @@ import Mole
 import numpy as np
 
 def main():
-    mole = Mole.Mole('PAT_92_141_551')
+    mole = Mole.Mole('PAT_91_140_664')
     mole.show_per()
-    print(f"Convex Perimeter: {mole.conv}")
+    mole.symmetry_detection()
     print(f"Perimeter Sum: {np.sum(mole.perim)}")
-    symmetry = mole.symmetry_detection()
-    print(f"Symmetry Detected: {symmetry}")
+    
+ #   symmetry = mole.symmetry_detection()
+  #  print(f"Symmetry Detected: {symmetry}")
     print("Done!")
 
 if __name__ == "__main__":
