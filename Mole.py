@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import transform, morphology
-  
+from skimage.segmentation import slic, mark_boundaries
 
 class Mole:
     def __init__(self, image_id):
@@ -57,8 +57,25 @@ class Mole:
 
         return perimeter_im
 
+    #show_perimeter - example of function that just shows smthing
     def show_per(self):
         
 
         plt.imshow(self.perim, cmap='gray')
         plt.show()
+    
+
+    def color_regions(self):
+        segments_slic = slic(self.img, n_segments=10, compactness=3, sigma=3, start_label=1)
+        fig, ax = plt.subplots(1, 2, figsize=(10, 10), sharex=True, sharey=True)
+
+        ax[0].imshow(self.img)
+        ax[0].set_title("Original")
+
+        ax[1].imshow(mark_boundaries(self.img, segments_slic))
+        ax[1].set_title('SLIC')
+
+        print("here1")
+        plt.tight_layout()
+        plt.show()
+        print("here2")
