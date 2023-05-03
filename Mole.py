@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import transform, morphology
+import cv2
 
 # A class for processing mole images
 class Mole:
@@ -12,12 +13,17 @@ class Mole:
         # Calculate the mole's perimeter
         self.perim = self.perimeter(self.mask)
 
+        # Convert to binary
+        self.conv = self.binary_converter(self.mask)
+        # Calculate the mole's symmetry
+        self.sym = self.symmetry_detection(self.conv)
+
     # Method that loads and prepares image and mask for further processing
     # Input: image id
     # Output: image and mask
     def prepare_im(self,im_id):
         # Set path to image and mask directories
-        path = '.'
+        path = '.\\Medical_Imaging'
         # Load image and scale it down by a factor of 4
         im = plt.imread(path + "\\Images\\" + im_id + '.png')
         im = transform.resize(im, (im.shape[0] // 4, im.shape[1] // 4), anti_aliasing=True)
@@ -54,6 +60,14 @@ class Mole:
          #[0 1 1 1 0]
          #[0 0 1 0 0]]
         brush = morphology.disk(2)
+
+ #brush saves this shape:
+        #[[0 0 1 0 0]
+         #[0 1 1 1 0]
+         #[1 1 1 1 1]
+         #[0 1 1 1 0]
+         #[0 0 1 0 0]]
+
         # Erode the mask to remove small details
         mask_cleaned = morphology.binary_erosion(img_msk, brush)
         # Calculate the perimeter by subtracting the cleaned mask from the original mask
@@ -62,21 +76,67 @@ class Mole:
 
     # Method that displays the calculated perimeter
     def show_per(self):
+        
         plt.imshow(self.perim, cmap='gray')
         plt.show()
     
+    def binary_converter(self, img_msk):
+        # Convert the image to binary
+        ret, thresh = cv2.threshold(img_msk, 127, 255, 0)
+        return thresh
 
-    def color_regions(self):
-        segments_slic = slic(self.img, n_segments=10, compactness=3, sigma=3, start_label=1)
-        fig, ax = plt.subplots(1, 2, figsize=(10, 10), sharex=True, sharey=True)
+    def symmetry_detection(self):
+        # Convert binary image into an array of 2D points
+        points = cv2.findNonZero(self)
+        print(points)
+        # Find the bounding rectangle of the points
+        x, y, w, h = cv2.boundingRect(points)
+        print(x,y,w,h)
+        # Crop the binary image using the bounding rectangle
+        thresh_square = self.conv[y:y+h, x:x+w]
 
-        ax[0].imshow(self.img)
-        ax[0].set_title("Original")
+        # Reduce the image to 1D arrays
+        G_X = cv2.reduce(thresh_square, 0, cv2.REDUCE_SUM)
+        G_Y = cv2.reduce(thresh_square, 1, cv2.REDUCE_SUM)
 
-        ax[1].imshow(mark_boundaries(self.img, segments_slic))
-        ax[1].set_title('SLIC')
+        # Normalize the histograms
+        G_X = cv2.normalize(G_X, G_X, 0, 1, cv2.NORM_MINMAX)
+        G_Y = cv2.normalize(G_Y, G_Y, 0, 1, cv2.NORM_MINMAX)
 
-        print("here1")
-        plt.tight_layout()
+        # Compare histograms using correlation distance
+        compare_val = cv2.compareHist(G_X, G_Y, cv2.HISTCMP_CORREL)
+
+        # Threshold to separate symmetric and asymmetric objects
+        if compare_val > 0.9:
+            print("Symmetric object detected!")
+        else:
+            print("Asymmetric object detected!")
+        return
+
+    def mask_segm(self,im, gt):
+        # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+        # axes[0].imshow(im)
+        # axes[1].imshow(gt, cmap='gray')
+        #fig.tight_layout()
+        im2 = im.copy()
+        im2[gt==0] = 0
+        # Display 
+        plt.imshow(im2)
         plt.show()
-        print("here2")
+   
+"""
+    # Load the image
+    image = Image.open("example_image.png")
+
+    # Convert the image to black and white
+    image = image.convert("1")
+
+    # Get the pixel values as a matrix of 0s and 1s
+    matrix = list(image.getdata())
+    matrix = [matrix[i:i+image.width] for i in range(0, len(matrix), image.width)]
+
+    # Print the matrix
+    for row in matrix:
+        print(row)
+
+        """
