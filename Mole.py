@@ -7,46 +7,45 @@ import os
 # A class for processing mole images
 class Mole:
     def __init__(self, image_id):
+        self.id = image_id
         # Load and prepare image and mask
-        self.img, self.mask = self.prepare_im(image_id)
+        self.img, self.mask = self.prepare_im()
         # Find maximum height and rotated mask
-        self.mask, self.high = self.max_height(self.mask)
+        self.mask, self.high = self.max_height()
         # Calculate the mole's perimeter
-        self.perim = self.perimeter(self.mask)
-        # Save the perimeter image
-        plt.imsave("perimeter.png", self.perim, format = 'png', cmap='gray')
+        self.perim = self.perimeter()
         # Calculate the mole's symmetry
-        self.symmetry = self.symmetry_detection("perimeter.png")
-
-    # Method that detects symmetry in the mole
+        self.symmetry = self.symmetry_detection()
         # Fuse the mask and the original picture
       #  self.seg = self.mask_segm(self.img,self.mask,image_id)          UNCOMMENT THIS LINE TO RUN THE SEGMENTATION
                                                                         #THIS IS A TEMPORARY FIX       
+        self.seg = self.mask_segm()
+
     # Method that loads and prepares image and mask for further processing
     # Input: image id
     # Output: image and mask
-    def prepare_im(self,im_id):
+    def prepare_im(self):
         # Set path to image and mask directories
-        path = '.\\Medical_Imaging'
+        path = '.'
         # Load image and scale it down by a factor of 4
-        im = plt.imread(path + "\\Images\\" + im_id + '.png')
+        im = plt.imread(path + "\\Images\\" + self.id + '.png')
         im = transform.resize(im, (im.shape[0] // 4, im.shape[1] // 4), anti_aliasing=True)
         # Load mask and scale it down by a factor of 4
-        gt = plt.imread(path + '\\Masks_png\\' + "mask_"+ im_id + '.png')
+        gt = plt.imread(path + '\\Masks_png\\' + "mask_"+ self.id + '.png')
         gt = transform.resize(gt, (gt.shape[0] // 4, gt.shape[1] // 4), anti_aliasing=False) #Setting it to True creates values that are not 0 or 1
         return im, gt
 
     # Method that finds the maximum height of the mole and rotates the mask to the correct orientation
     # Input: mask of the image
     # Output: rotated mask and maximum height of the mole
-    def max_height(self, img_msk):
+    def max_height(self):
         # Sum the number of pixels in each column
-        pixels_in_col = np.sum(img_msk, axis=0)
+        pixels_in_col = np.sum(self.mask, axis=0)
         # Find the column with the largest number of pixels
         max_pixels_in_col = np.max(pixels_in_col)
         # Rotate the mask by 45 degrees until the largest width is found
         for i in range(1,8):
-            rot_mask = transform.rotate(img_msk, 45*i)
+            rot_mask = transform.rotate(self.mask, 45*i)
             height = np.max(np.sum(rot_mask, axis=0))
             if height > max_pixels_in_col:
                 max_pixels_in_col = height
@@ -56,39 +55,34 @@ class Mole:
     # Method that calculates the perimeter of the mole
     # Input: mask of the image
     # Output: perimeter of the mole
-    def perimeter(self, img_msk):
-        # Define a brush shape for erosion
-        brush = morphology.disk(2)
-
+    def perimeter(self):
         #brush saves this shape:
         #[[0 0 1 0 0]
          #[0 1 1 1 0]
          #[1 1 1 1 1]
          #[0 1 1 1 0]
          #[0 0 1 0 0]]
+        brush = morphology.disk(2)
 
         # Erode the mask to remove small details
-        mask_cleaned = morphology.binary_erosion(img_msk, brush)
+        mask_cleaned = morphology.binary_erosion(self.mask, brush)
         # Calculate the perimeter by subtracting the cleaned mask from the original mask
-        perimeter_im = img_msk - mask_cleaned
+        perimeter_im = self.mask - mask_cleaned
         return perimeter_im
-
-
-
-    # Method that displays the calculated perimeter
-    def show_per(self):
-        
-        plt.imshow(self.perim, cmap='gray')
-        plt.show()
     
     # Method that detects symmetry in the mole
-    def symmetry_detection(self, img_perim):
+    def symmetry_detection(self):
+
+        # Save the perimeter image
+        plt.imsave("perimeter.png", self.perim, format = 'png', cmap='gray')
         # Load the grayscale image
-        img_gray = cv2.imread(img_perim, cv2.IMREAD_GRAYSCALE)
-        print(img_gray)
+        img_gray = cv2.imread("perimeter.png", cv2.IMREAD_GRAYSCALE)
+        #print(img_gray)
+
         # Threshold the image to create a binary image
         ret, img_binary = cv2.threshold(img_gray, 200, 255, cv2.THRESH_BINARY)
-        print(img_binary, ret)
+        #print(img_binary, ret)
+
         # Find the contours in the binary image
         contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -126,27 +120,50 @@ class Mole:
         mean_distance = np.mean(pair_distances)
         std_distance = np.std(pair_distances)
 
-        # Check if the object is symmetric
-        if std_distance < 10:
-            print("Object is symmetric:", std_distance)
-        else:
-            print("Object is not symmetric:", std_distance)
-        return
+        return std_distance
 
+
+    def mask_segm(self):
 """
     def mask_segm(self,im, gt):
         # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
         # axes[0].imshow(im)
         # axes[1].imshow(gt, cmap='gray')
         #fig.tight_layout()
+        im2 = self.img.copy()
+        im2[self.mask == 0] = 0
         im2 = im.copy()
         im2[mask==0] = 0                                                    #UNCOMMENT. THIS IS A TEMPORARY FIX
         # Save the resulting image in a folder called "results"
-        path = '.\\Medical_Imaging'
-        # Display 
-        plt.imshow(im2)
-        plt.imsave(path + '\\Fused_Images\\' + image_id + '_segm.png',im2)
+        path = '.'
+        plt.imsave(path + '\\Fused_Images\\' + self.id + '_segm.png',im2)
+        return im2
+
+    """
+    ---------------------------------- Print functions ----------------------------------
+    """
+
+
+    # Function prints out symmetry
+    def symmetric(self):
+        # Check if the object is symmetric
+        if self.symmetry < 10:
+            print("Object is symmetric:", self.symmetry)
+        else:
+            print("Object is not symmetric:", self.symmetry)
+
+    # Method that displays the calculated perimeter
+    def show_per(self):
+        
+        plt.imshow(self.perim, cmap='gray')
         plt.show()
+
+    def show_seg_mask(self):
+
+        # Display 
+        plt.imshow(self.seg)
+        plt.show()
+
    """
 """
     # Load the image
