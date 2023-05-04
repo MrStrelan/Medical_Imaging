@@ -5,14 +5,12 @@ import numpy as np
 def main():
     mole = Mole.Mole('PAT_91_140_664')
 
-    mole.show_per()
+    #mole.show_per()
+    #print(f"Perimeter Sum: {np.sum(mole.perim)}")
     
+    #mole.symmetric()
 
-    print(f"Perimeter Sum: {np.sum(mole.perim)}")
-    
-    mole.symmetric()
-
-    mole.show_seg_mask()
+    #mole.show_seg_mask()
 
     print("Done!")
 
