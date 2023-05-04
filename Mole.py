@@ -29,7 +29,7 @@ class Mole:
     # Output: image and mask
     def prepare_im(self):
         # Set path to image and mask directories
-        path = '.'
+        path = '.\\Medical_Imaging'
         # Load image and scale it down by a factor of 4
         im = plt.imread(path + "\\Images\\" + self.id + '.png')
         im = transform.resize(im, (im.shape[0] // 4, im.shape[1] // 4), anti_aliasing=True)
@@ -75,61 +75,74 @@ class Mole:
     
     # Method that detects symmetry in the mole
     def symmetry_detection(self):
-
         # Save the perimeter image
-        plt.imsave("perimeter.png", self.perim, format = 'png', cmap='gray')
+        plt.imsave("perimeter.png", self.perim, format='png', cmap='gray')
         # Load the grayscale image
         img_gray = cv2.imread("perimeter.png", cv2.IMREAD_GRAYSCALE)
-        #print(img_gray)
 
         # Threshold the image to create a binary image
         ret, img_binary = cv2.threshold(img_gray, 200, 255, cv2.THRESH_BINARY)
-        print(img_binary)
 
         # Find the contours in the binary image
         contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Calculate the centroid of the object
-        M = cv2.moments(contours[0])
-        #print(M)
-        cx = int(M['m10'] / M['m00'])
-        cy = int(M['m01'] / M['m00'])
+        symmetry_values = []
+        for contour in contours:
+            # Calculate the centroid of the object
+            M = cv2.moments(contour)
+            cx = int(M['m10'] / M['m00'])
+            cy = int(M['m01'] / M['m00'])
 
-        # Find the distance between each point in the contour and the centroid
-        distances = []
-        for point in contours[0]:
-            px, py = point[0]
-            distance = np.sqrt((px - cx)**2 + (py - cy)**2)
-            distances.append(distance)
-        mean_distance = sum(distances) / len(distances)
-        # Find the corresponding points on the other side of the centroid
-        corresponding_points = []
-        for point in contours[0]:
-            px, py = point[0]
-            distance = np.sqrt((px - cx)**2 + (py - cy)**2)
-            dx = int(cx + (cx - px) / distance * mean_distance)
-            dy = int(cy + (cy - py) / distance * mean_distance)
-            corresponding_points.append((dx, dy))
+            # Find the distance between each point in the contour and the centroid
+            distances = []
+            for point in contour:
+                px, py = point[0]
+                distance = np.sqrt((px - cx)**2 + (py - cy)**2)
+                distances.append(distance)
+            mean_distance = sum(distances) / len(distances)
 
-        # Calculate the distances between the pairs of corresponding points
-        pair_distances = []
-        for i in range(len(contours[0])):
-            px, py = contours[0][i][0]
-            qx, qy = corresponding_points[i]
-            distance = np.sqrt((px - qx)**2 + (py - qy)**2)
-            pair_distances.append(distance)
+            # Find the corresponding points on the other side of the centroid
+            corresponding_points = []
+            for point in contour:
+                px, py = point[0]
+                distance = np.sqrt((px - cx)**2 + (py - cy)**2)
+                dx = int(cx + (cx - px) / distance * mean_distance)
+                dy = int(cy + (cy - py) / distance * mean_distance)
+                corresponding_points.append((dx, dy))
 
-        # Calculate the mean and standard deviation of the distances
-        mean_distance = np.mean(pair_distances)
-        std_distance = np.std(pair_distances)
+            # Calculate the distances between the pairs of points
+            pair_distances = []
+            for i in range(len(contour)):
+                px, py = contour[i][0]
+                qx, qy = corresponding_points[i]
+                distance = np.sqrt((px - qx)**2 + (py - qy)**2)
+                pair_distances.append(distance)
 
-        return std_distance
+            # Calculate the mean and standard deviation of the distances
+            mean_distance = np.mean(pair_distances)
+            std_distance = np.std(pair_distances)
+
+            # Calculate symmetry value for this object
+            symmetry_value = std_distance
+            symmetry_values.append(symmetry_value)
+
+        return symmetry_values
 
     # Returns picture where eberything besides mask shown as black
     def mask_segm(self):
 
+
+  #  def mask_segm(self):
+"""
+    def mask_segm(self,im, gt):
+        # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+        # axes[0].imshow(im)
+        # axes[1].imshow(gt, cmap='gray')
+        #fig.tight_layout()
         im2 = self.img.copy()
         im2[self.mask == 0] = 0
+        im2 = im.copy()
+        im2[mask==0] = 0                                                    #UNCOMMENT. THIS IS A TEMPORARY FIX
         # Save the resulting image in a folder called "results"
         path = '.'
         plt.imsave(path + '\\Fused_Images\\' + self.id + '_segm.png',im2)
