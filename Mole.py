@@ -2,47 +2,48 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import transform, morphology
 import cv2
+import os
 
 # A class for processing mole images
 class Mole:
     def __init__(self, image_id):
+        self.id = image_id
         # Load and prepare image and mask
-        self.img, self.mask = self.prepare_im(image_id)
+        self.img, self.mask = self.prepare_im()
         # Find maximum height and rotated mask
-        self.mask, self.high = self.max_height(self.mask)
+        self.mask, self.high = self.max_height()
         # Calculate the mole's perimeter
-        self.perim = self.perimeter(self.mask)
-
-        # Convert to binary
-        self.conv = self.binary_converter(self.mask)
+        self.perim = self.perimeter()
         # Calculate the mole's symmetry
-        self.sym = self.symmetry_detection(self.conv)
+        self.symmetry = self.symmetry_detection()
+        # Fuse the mask and the original picture
+        self.seg = self.mask_segm()
 
     # Method that loads and prepares image and mask for further processing
     # Input: image id
     # Output: image and mask
-    def prepare_im(self,im_id):
+    def prepare_im(self):
         # Set path to image and mask directories
-        path = '.\\Medical_Imaging'
+        path = '.'
         # Load image and scale it down by a factor of 4
-        im = plt.imread(path + "\\Images\\" + im_id + '.png')
+        im = plt.imread(path + "\\Images\\" + self.id + '.png')
         im = transform.resize(im, (im.shape[0] // 4, im.shape[1] // 4), anti_aliasing=True)
         # Load mask and scale it down by a factor of 4
-        gt = plt.imread(path + '\\Masks_png\\' + im_id + '.png')
+        gt = plt.imread(path + '\\Masks_png\\' + "mask_"+ self.id + '.png')
         gt = transform.resize(gt, (gt.shape[0] // 4, gt.shape[1] // 4), anti_aliasing=False) #Setting it to True creates values that are not 0 or 1
         return im, gt
 
     # Method that finds the maximum height of the mole and rotates the mask to the correct orientation
     # Input: mask of the image
     # Output: rotated mask and maximum height of the mole
-    def max_height(self, img_msk):
+    def max_height(self):
         # Sum the number of pixels in each column
-        pixels_in_col = np.sum(img_msk, axis=0)
+        pixels_in_col = np.sum(self.mask, axis=0)
         # Find the column with the largest number of pixels
         max_pixels_in_col = np.max(pixels_in_col)
         # Rotate the mask by 45 degrees until the largest width is found
         for i in range(1,8):
-            rot_mask = transform.rotate(img_msk, 45*i)
+            rot_mask = transform.rotate(self.mask, 45*i)
             height = np.max(np.sum(rot_mask, axis=0))
             if height > max_pixels_in_col:
                 max_pixels_in_col = height
@@ -52,7 +53,7 @@ class Mole:
     # Method that calculates the perimeter of the mole
     # Input: mask of the image
     # Output: perimeter of the mole
-    def perimeter(self, img_msk):
+    def perimeter(self):
         #brush saves this shape:
         #[[0 0 1 0 0]
          #[0 1 1 1 0]
@@ -61,69 +62,102 @@ class Mole:
          #[0 0 1 0 0]]
         brush = morphology.disk(2)
 
- #brush saves this shape:
-        #[[0 0 1 0 0]
-         #[0 1 1 1 0]
-         #[1 1 1 1 1]
-         #[0 1 1 1 0]
-         #[0 0 1 0 0]]
-
         # Erode the mask to remove small details
-        mask_cleaned = morphology.binary_erosion(img_msk, brush)
+        mask_cleaned = morphology.binary_erosion(self.mask, brush)
         # Calculate the perimeter by subtracting the cleaned mask from the original mask
-        perimeter_im = img_msk - mask_cleaned
+        perimeter_im = self.mask - mask_cleaned
         return perimeter_im
+    
+    # Method that detects symmetry in the mole
+    def symmetry_detection(self):
+
+        # Save the perimeter image
+        plt.imsave("perimeter.png", self.perim, format = 'png', cmap='gray')
+        # Load the grayscale image
+        img_gray = cv2.imread("perimeter.png", cv2.IMREAD_GRAYSCALE)
+        #print(img_gray)
+
+        # Threshold the image to create a binary image
+        ret, img_binary = cv2.threshold(img_gray, 200, 255, cv2.THRESH_BINARY)
+        #print(img_binary, ret)
+
+        # Find the contours in the binary image
+        contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        # Calculate the centroid of the object
+        M = cv2.moments(contours[0])
+        #print(M)
+        cx = int(M['m10'] / M['m00'])
+        cy = int(M['m01'] / M['m00'])
+
+        # Find the distance between each point in the contour and the centroid
+        distances = []
+        for point in contours[0]:
+            px, py = point[0]
+            distance = np.sqrt((px - cx)**2 + (py - cy)**2)
+            distances.append(distance)
+        mean_distance = sum(distances) / len(distances)
+        # Find the corresponding points on the other side of the centroid
+        corresponding_points = []
+        for point in contours[0]:
+            px, py = point[0]
+            distance = np.sqrt((px - cx)**2 + (py - cy)**2)
+            dx = int(cx + (cx - px) / distance * mean_distance)
+            dy = int(cy + (cy - py) / distance * mean_distance)
+            corresponding_points.append((dx, dy))
+
+        # Calculate the distances between the pairs of corresponding points
+        pair_distances = []
+        for i in range(len(contours[0])):
+            px, py = contours[0][i][0]
+            qx, qy = corresponding_points[i]
+            distance = np.sqrt((px - qx)**2 + (py - qy)**2)
+            pair_distances.append(distance)
+
+        # Calculate the mean and standard deviation of the distances
+        mean_distance = np.mean(pair_distances)
+        std_distance = np.std(pair_distances)
+
+        return std_distance
+
+
+    def mask_segm(self):
+        # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+        # axes[0].imshow(im)
+        # axes[1].imshow(gt, cmap='gray')
+        #fig.tight_layout()
+        im2 = self.img.copy()
+        im2[self.mask == 0] = 0
+        # Save the resulting image in a folder called "results"
+        path = '.'
+        plt.imsave(path + '\\Fused_Images\\' + self.id + '_segm.png',im2)
+        return im2
+
+    """
+    ---------------------------------- Print functions ----------------------------------
+    """
+
+
+    # Function prints out symmetry
+    def symmetric(self):
+        # Check if the object is symmetric
+        if self.symmetry < 10:
+            print("Object is symmetric:", self.symmetry)
+        else:
+            print("Object is not symmetric:", self.symmetry)
 
     # Method that displays the calculated perimeter
     def show_per(self):
         
         plt.imshow(self.perim, cmap='gray')
         plt.show()
-    
-    def binary_converter(self, img_msk):
-        # Convert the image to binary
-        ret, thresh = cv2.threshold(img_msk, 127, 255, 0)
-        return thresh
 
-    def symmetry_detection(self):
-        # Convert binary image into an array of 2D points
-        points = cv2.findNonZero(self)
-        print(points)
-        # Find the bounding rectangle of the points
-        x, y, w, h = cv2.boundingRect(points)
-        print(x,y,w,h)
-        # Crop the binary image using the bounding rectangle
-        thresh_square = self.conv[y:y+h, x:x+w]
+    def show_seg_mask(self):
 
-        # Reduce the image to 1D arrays
-        G_X = cv2.reduce(thresh_square, 0, cv2.REDUCE_SUM)
-        G_Y = cv2.reduce(thresh_square, 1, cv2.REDUCE_SUM)
-
-        # Normalize the histograms
-        G_X = cv2.normalize(G_X, G_X, 0, 1, cv2.NORM_MINMAX)
-        G_Y = cv2.normalize(G_Y, G_Y, 0, 1, cv2.NORM_MINMAX)
-
-        # Compare histograms using correlation distance
-        compare_val = cv2.compareHist(G_X, G_Y, cv2.HISTCMP_CORREL)
-
-        # Threshold to separate symmetric and asymmetric objects
-        if compare_val > 0.9:
-            print("Symmetric object detected!")
-        else:
-            print("Asymmetric object detected!")
-        return
-
-    def mask_segm(self,im, gt):
-        # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
-        # axes[0].imshow(im)
-        # axes[1].imshow(gt, cmap='gray')
-        #fig.tight_layout()
-        im2 = im.copy()
-        im2[gt==0] = 0
         # Display 
-        plt.imshow(im2)
+        plt.imshow(self.seg)
         plt.show()
-   
+
 """
     # Load the image
     image = Image.open("example_image.png")
