@@ -17,7 +17,7 @@ def symmetry_to_json():
     #  mole.show_per()
         
 
-        print(f"Perimeter Sum: {np.sum(mole.perim)}")
+     #   print(f"Perimeter Sum: {np.sum(mole.perim)}")
         
     # mole.symmetric()
         values = mole.symmetry_detection()
@@ -34,4 +34,5 @@ def symmetry_to_json():
 
 
 if __name__ == "__main__":
-    main()
+    symmetry_to_json()
+    #main()
