@@ -54,6 +54,7 @@ class Mole:
     # Method that calculates the perimeter of the mole
     # Input: mask of the image
     # Output: perimeter of the mole
+    
     def perimeter(self):
         #brush saves this shape:
         #[[0 0 1 0 0]

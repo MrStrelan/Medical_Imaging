@@ -1,5 +1,6 @@
 import csv
-  
+import shutil
+import os
 # Open file
 with open('Medical_Imaging/metadata.csv') as file_obj:
       
@@ -19,15 +20,33 @@ with open('Medical_Imaging/metadata.csv') as file_obj:
     
  #   for row in reader_obj:
   #      listscv.append(row[])
+sussylist = ['MEL', "AK", "SCC"]
+
+def sussyPicSeperator(): #copyies cancerous pics to another folder
+
+    for el in listscv:
+        if el[17] == "AK" and el[24] in os.listdir(".\\Medical_Imaging\\Images"):
+            shutil.copy(".\\Medical_Imaging\\Images\\" + el[24], ".\\Medical_Imaging\\sussyPics\\AK\\" + el[24])
+        elif el[17] == "SCC" and el[24] in os.listdir(".\\Medical_Imaging\\Images"):
+            shutil.copy(".\\Medical_Imaging\\Images\\" + el[24], ".\\Medical_Imaging\\sussyPics\\SCC\\" + el[24])
+        elif el[17] == "MEL" and el[24] in os.listdir(".\\Medical_Imaging\\Images"):
+            shutil.copy(".\\Medical_Imaging\\Images\\" + el[24], ".\\Medical_Imaging\\sussyPics\\MEL\\" + el[24])
+
+
+
+    return print("LET'S GOOO!")
+
 
 print(len(listscv))
 agelist = []
 
 diagnoselist = ['NEV', 'BCC', 'ACK', 'SEK', 'SCC', 'MEL']
+
+
 def diagnosecount():
     diagnosecount = [0, 0, 0, 0, 0, 0]
     #[244, 845, 730, 235, 192, 52]
-
+   # diagnosedict = {'NEV': 0, 'BCC': 0, 'ACK': 0, 'SEK': 0, 'SCC': 0, 'MEL': 0}
     for el in listscv:
         if el[17] == 'NEV':
             diagnosecount[0] += 1
@@ -41,7 +60,10 @@ def diagnosecount():
             diagnosecount[4] += 1
         elif el[17] == 'MEL':
             diagnosecount[5] += 1
-    return diagnosecount
+
+    diagonsedict = {'NEV': 0, 'BCC': 0, 'ACK': 0, 'SEK': 0, 'SCC': 0, 'MEL': 0}
+    diagonsedict.update({'NEV': diagnosecount[0], 'BCC': diagnosecount[1], 'ACK': diagnosecount[2], 'SEK': diagnosecount[3], 'SCC': diagnosecount[4], 'MEL': diagnosecount[5]})
+    return diagnosecount, diagonsedict
 
 #I need to create a circular diagram plot of the diagnoses and their counts
 
@@ -59,7 +81,8 @@ def diagnoselist():
 
 print(diagnoses)
 print(diagnosecount())
-
+sussyPicSeperator()
+"""
 import matplotlib.pyplot as plt
 
 diagnoses = ['NEV', 'BCC', 'ACK', 'SEK', 'SCC', 'MEL']
@@ -77,3 +100,4 @@ ax1.pie(counts, labels=diagnoses, autopct=make_autopct(counts), startangle=90)
 ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 
 plt.show()
+"""
