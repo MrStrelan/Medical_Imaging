@@ -1,8 +1,11 @@
+from cmath import pi
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import transform, morphology
 import cv2
 import os
+from sklearn.cluster import KMeans
+import colorsys
 
 # A class for processing mole images
 class Mole:
@@ -17,9 +20,9 @@ class Mole:
         # Calculate the mole's symmetry
         self.symmetry = self.symmetry_detection()
         # Fuse the mask and the original picture
-      #  self.seg = self.mask_segm(self.img,self.mask,image_id)          UNCOMMENT THIS LINE TO RUN THE SEGMENTATION
-                                                                        #THIS IS A TEMPORARY FIX       
-      #  self.seg = self.mask_segm()
+        self.seg = self.mask_segm()
+        # Calculate compactness
+        self.comp = self.compactness_calc()
 
     # Method that loads and prepares image and mask for further processing
     # Input: image id
@@ -125,6 +128,9 @@ class Mole:
 
         return symmetry_values
 
+    # Returns picture where eberything besides mask shown as black
+    def mask_segm(self):
+
 
   #  def mask_segm(self):
 """
@@ -142,10 +148,77 @@ class Mole:
         plt.imsave(path + '\\Fused_Images\\' + self.id + '_segm.png',im2)
         return im2
 
-    """
+    #Calculate compactness from area an perimeter
+    def compactness_calc(self):
+        compactness = (np.sum(self.perim)*np.sum(self.perim))/4*pi*np.sum(self.mask)
+        return compactness
+    
+    def mask_segm(img, mask):
+        # Overlay the mask on the original image
+        im2 = img.copy()
+        im2[mask == 0] = 0
+        return im2
 
-  #  ---------------------------------- Print functions ----------------------------------
-"""
+    img_path = "/Users/tobiasmichelsen/Downloads/imgs_part_1/PAT_9_17_80.png"
+    mask_path = "/Users/tobiasmichelsen/Desktop/Masks_Folder1/mask_PAT_9_17_80.png"
+
+    # Load image and mask files as NumPy arrays
+    img = cv2.imread(img_path)
+    mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)  # Load the mask as a grayscale image
+
+    # Convert the image from BGR (OpenCV default) to RGB (Matplotlib default)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    # Call the mask_segm function and save the result to a variable
+    overlayed_img = mask_segm(img, mask)
+
+    # Display the overlayed image using Matplotlib
+    plt.imshow(overlayed_img)
+    plt.show()
+
+    def plot_color_histogram(image, mask=None):
+        color_channels = ('r', 'g', 'b')
+        for i, color in enumerate(color_channels):
+            histogram = cv2.calcHist([image], [i], mask, [256], [0, 256])
+            plt.plot(histogram, color=color)
+            plt.xlim([0, 256])
+        plt.xlabel('Color intensity')
+        plt.ylabel('Frequency')
+        plt.show()
+
+    # Create a mask for the non-black pixels in the overlayed_img
+    non_black_mask = cv2.inRange(overlayed_img, (1, 1, 1), (255, 255, 255))
+
+    # Call the modified plot_color_histogram function with the non_black_mask
+    plot_color_histogram(overlayed_img, non_black_mask)
+
+    #Now we want to find the corresponding HSV values as they mimic the way humans perceive color.
+
+    def find_hsv(r, g, b):
+        r /= 255.0
+        g /= 255.0
+        b /= 255.0
+        hsv = colorsys.rgb_to_hsv(r, g, b)
+        return hsv
+
+    def extract_rgb_values(self):
+        # Get the indices of the non-black pixels in the mask
+        non_black_indices = np.where(self.mask == 255)
+
+        # Extract the RGB values using the non_black_indices
+        rgb_values = self.img[non_black_indices]
+
+        # Convert the extracted RGB values to HSV
+        hsv_values = np.array([find_hsv(r, g, b) for r, g, b in rgb_values])
+        
+        return hsv_values
+
+    # Extract the HSV values of the non-black pixels in the overlayed_img
+    hsv_values = extract_rgb_values(overlayed_img, non_black_mask)
+    """
+    """
+    ---------------------------------- Print functions ----------------------------------
+    """
 
 
     # Function prints out symmetry
@@ -167,21 +240,3 @@ class Mole:
         # Display 
         plt.imshow(self.seg)
         plt.show()
-
-   """
-"""
-    # Load the image
-    image = Image.open("example_image.png")
-
-    # Convert the image to black and white
-    image = image.convert("1")
-
-    # Get the pixel values as a matrix of 0s and 1s
-    matrix = list(image.getdata())
-    matrix = [matrix[i:i+image.width] for i in range(0, len(matrix), image.width)]
-
-    # Print the matrix
-    for row in matrix:
-        print(row)
-
-"""
