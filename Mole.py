@@ -52,8 +52,7 @@ class Mole:
             height = np.max(np.sum(rot_mask, axis=0))
             if height > max_pixels_in_col:
                 max_pixels_in_col = height
-                final_msk = rot_mask
-        return final_msk, max_pixels_in_col
+        return rot_mask, max_pixels_in_col
 
     # Method that calculates the perimeter of the mole
     # Input: mask of the image
