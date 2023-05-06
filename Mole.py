@@ -216,6 +216,7 @@ class Mole:
     # Extract the HSV values of the non-black pixels in the overlayed_img
     hsv_values = extract_rgb_values(overlayed_img, non_black_mask)
     """
+    """
     ---------------------------------- Print functions ----------------------------------
     """
 
