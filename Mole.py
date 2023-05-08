@@ -20,7 +20,7 @@ class Mole:
         # Calculate the mole's symmetry
         self.symmetry = self.symmetry_detection()
         # Fuse the mask and the original picture
-        self.seg = self.mask_segm()
+        self.seg = self.overlay_segm()
         # Calculate compactness
         self.comp = self.compactness_calc()
 
@@ -128,20 +128,16 @@ class Mole:
         return symmetry_values
 
     # Returns picture where eberything besides mask shown as black
-    def mask_segm(self):
 
-
-  #  def mask_segm(self):
-"""
-    def mask_segm(self,im, gt):
+    def overlay_segm(self):
         # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
         # axes[0].imshow(im)
         # axes[1].imshow(gt, cmap='gray')
         #fig.tight_layout()
+
         im2 = self.img.copy()
         im2[self.mask == 0] = 0
-        im2 = im.copy()
-        im2[mask==0] = 0                                                    #UNCOMMENT. THIS IS A TEMPORARY FIX
+        
         # Save the resulting image in a folder called "results"
         path = '.'
         plt.imsave(path + '\\Fused_Images\\' + self.id + '_segm.png',im2)
@@ -151,48 +147,15 @@ class Mole:
     def compactness_calc(self):
         compactness = (np.sum(self.perim)*np.sum(self.perim))/4*pi*np.sum(self.mask)
         return compactness
+
     
-    def mask_segm(img, mask):
-        # Overlay the mask on the original image
-        im2 = img.copy()
-        im2[mask == 0] = 0
-        return im2
-
-    img_path = "/Users/tobiasmichelsen/Downloads/imgs_part_1/PAT_9_17_80.png"
-    mask_path = "/Users/tobiasmichelsen/Desktop/Masks_Folder1/mask_PAT_9_17_80.png"
-
-    # Load image and mask files as NumPy arrays
-    img = cv2.imread(img_path)
-    mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)  # Load the mask as a grayscale image
-
-    # Convert the image from BGR (OpenCV default) to RGB (Matplotlib default)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-    # Call the mask_segm function and save the result to a variable
-    overlayed_img = mask_segm(img, mask)
-
-    # Display the overlayed image using Matplotlib
-    plt.imshow(overlayed_img)
-    plt.show()
-
-    def plot_color_histogram(image, mask=None):
-        color_channels = ('r', 'g', 'b')
-        for i, color in enumerate(color_channels):
-            histogram = cv2.calcHist([image], [i], mask, [256], [0, 256])
-            plt.plot(histogram, color=color)
-            plt.xlim([0, 256])
-        plt.xlabel('Color intensity')
-        plt.ylabel('Frequency')
-        plt.show()
-
     # Create a mask for the non-black pixels in the overlayed_img
     non_black_mask = cv2.inRange(overlayed_img, (1, 1, 1), (255, 255, 255))
 
     # Call the modified plot_color_histogram function with the non_black_mask
-    plot_color_histogram(overlayed_img, non_black_mask)
+    plot_color_histogramRGB(overlayed_img, non_black_mask)
 
     #Now we want to find the corresponding HSV values as they mimic the way humans perceive color.
-
     def find_hsv(r, g, b):
         r /= 255.0
         g /= 255.0
@@ -214,7 +177,7 @@ class Mole:
 
     # Extract the HSV values of the non-black pixels in the overlayed_img
     hsv_values = extract_rgb_values(overlayed_img, non_black_mask)
-    """
+
     """
     ---------------------------------- Print functions ----------------------------------
     """
@@ -239,3 +202,81 @@ class Mole:
         # Display 
         plt.imshow(self.seg)
         plt.show()
+
+    
+    def plot_color_histogramRGB(self):
+        color_channels = ('r', 'g', 'b')
+        for i, color in enumerate(color_channels):
+            histogram = cv2.calcHist([self.img], [i], self.mask, [256], [0, 256])
+            plt.plot(histogram, color=color)
+            plt.xlim([0, 256])
+        plt.xlabel('Color intensity')
+        plt.ylabel('Frequency')
+        plt.show()
+
+        #-----------------------------------------------------------------------------------------
+        import cv2
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+import colorsys
+
+def mask_segm(img, mask):
+    # Overlay the mask on the original image
+    im2 = img.copy()
+    im2[mask == 0] = 0
+    return im2
+
+# Load image and mask files as NumPy arrays
+img = cv2.imread(img_path)
+mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)  # Load the mask as a grayscale image
+
+# Convert the image from BGR (OpenCV default) to RGB (Matplotlib default)
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+# Call the mask_segm function and save the result to a variable
+overlayed_img = mask_segm(img, mask)
+
+# Display the overlayed image using Matplotlib
+plt.imshow(overlayed_img)
+plt.show()
+
+def plot_color_histogram(image, mask=None):
+    color_channels = ('r', 'g', 'b')
+    for i, color in enumerate(color_channels):
+        histogram = cv2.calcHist([image], [i], mask, [256], [0, 256])
+        plt.plot(histogram, color=color)
+        plt.xlim([0, 256])
+    plt.xlabel('Color intensity')
+    plt.ylabel('Frequency')
+    plt.show()
+
+# Create a mask for the non-black pixels in the overlayed_img
+non_black_mask = cv2.inRange(overlayed_img, (1, 1, 1), (255, 255, 255))
+
+# Call the modified plot_color_histogram function with the non_black_mask
+plot_color_histogram(overlayed_img, non_black_mask)
+
+#Now we want to find the corresponding HSV values as they mimic the way humans perceive color.
+
+def find_hsv(r, g, b):
+    r /= 255.0
+    g /= 255.0
+    b /= 255.0
+    hsv = colorsys.rgb_to_hsv(r, g, b)
+    return hsv
+
+def extract_rgb_values(image, mask):
+    # Get the indices of the non-black pixels in the mask
+    non_black_indices = np.where(mask == 255)
+
+    # Extract the RGB values using the non_black_indices
+    rgb_values = image[non_black_indices]
+
+    # Convert the extracted RGB values to HSV
+    hsv_values = np.array([find_hsv(r, g, b) for r, g, b in rgb_values])
+
+    print("These are the corresponding hsv values to the pixels' rgb values:", hsv_values)
+    return hsv_values
+
+# Extract the HSV values of the non-black pixels in the overlayed_img
+hsv_values = extract_rgb_values(overlayed_img, non_black_mask)
