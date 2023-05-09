@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import transform, morphology
 import cv2
+from skimage.colors import rgb2hsv
 
 # A class for processing mole images
 class Mole:
@@ -184,3 +185,37 @@ class Mole:
         plt.xlabel('Color intensity')
         plt.ylabel('Frequency')
         plt.show()
+
+    
+    def find_colors(self):
+        im3 = self.mask_segm()
+        plt.imshow(im3)
+        hsv_im3 = rgb2hsv(hsv_im3)
+        count = 0
+        red = 0
+        black = 0
+        white = 0
+        blueGray = 0
+        darkBrown = 0
+        lightBrown = 0
+
+        for i in range(im3.shape[1]):
+            for j in range(im3.shape[0]):
+                h,s,v = hsv_im3[j,i]
+                if s or v > 0:
+                    count += 1
+                    if 0 <= h*360 <= 12 and 50/100 <= s <= 100/100 and 50/100 <= v <= 100/100:
+                        red += 1
+                    if 348 <= h*360 <= 360 and 50/100 <= s <= 100/100 and 50/100 <= v <= 100/100:
+                        red += 1
+                    if 170 <= h*360 <= 240 and 40/100<= s <= 70/100 and 40/100 <= v <= 70/100:
+                        blueGray += 1
+                    if  0 <= h*360 <= 360 and 0/100<= s <= 10/100 and 90/100 <= v <= 100/100:
+                        white += 1
+                    if  0 <= h*360 <= 360 and 0/100<= s <= 100/100 and 0/100 <= v <= 20/100:
+                        black += 1
+                    if  20 <= h*360 <= 45 and 50/100<= s <= 100/100 and 25/100 <= v <= 40/100:
+                        darkBrown += 1
+                    if  20 <= h*360 <= 45 and 45/100<= s <= 100/100 and 40/100 <= v <= 65/100:
+                        lightBrown += 1
+        return count, red, black, white, blueGray, darkBrown, lightBrown
