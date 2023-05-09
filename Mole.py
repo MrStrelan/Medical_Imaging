@@ -175,12 +175,3 @@ class Mole:
         plt.show()
 
     
-    def plot_color_histogramRGB(self):
-        color_channels = ('r', 'g', 'b')
-        for i, color in enumerate(color_channels):
-            histogram = cv2.calcHist([self.img], [i], self.mask, [256], [0, 256])
-            plt.plot(histogram, color=color)
-            plt.xlim([0, 256])
-        plt.xlabel('Color intensity')
-        plt.ylabel('Frequency')
-        plt.show()
