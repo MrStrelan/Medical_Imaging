@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Images",
+    "\\Masks_png"
   ],
-  "SelectedNode": "\\C:\\Users\\danii\\Source\\Repos\\Medical_Imaging",
+  "SelectedNode": "\\Mole.py",
   "PreviewInSolutionExplorer": false
 }
