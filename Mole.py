@@ -129,7 +129,7 @@ class Mole:
         return symmetry_values
 
     # Returns picture where eberything besides mask shown as black
-    def mask_segm(self):
+    #def mask_segm(self):
 
 
   #  def mask_segm(self):
@@ -215,10 +215,10 @@ class Mole:
 
     # Extract the HSV values of the non-black pixels in the overlayed_img
     hsv_values = extract_rgb_values(overlayed_img, non_black_mask)
-    """
-    """
+    
+    
     ---------------------------------- Print functions ----------------------------------
-    """
+    
 
 
     # Function prints out symmetry
@@ -228,15 +228,19 @@ class Mole:
             print("Object is symmetric:", self.symmetry)
         else:
             print("Object is not symmetric:", self.symmetry)
+        return
 
     # Method that displays the calculated perimeter
     def show_per(self):
         
         plt.imshow(self.perim, cmap='gray')
         plt.show()
+        return
 
     def show_seg_mask(self):
 
         # Display 
         plt.imshow(self.seg)
         plt.show()
+        return
+"""

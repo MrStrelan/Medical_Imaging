@@ -13,6 +13,7 @@ with open('Medical_Imaging/metadata.csv') as file_obj:
     reader_obj = csv.reader(file_obj)
     listscv = []  
     diagnoses = []
+    bodyplaces = []
     # Iterate over each row in the csv file 
     # using reader object
     for row in reader_obj:
@@ -69,19 +70,27 @@ def diagnosecount():
 
 def diagnoselist():
     for el in listscv:
-        if el[17] not in diagnoses:
-            diagnoses.append(el[17])
+        if el[14] not in bodyplaces:
+            bodyplaces.append(el[14])
         agelist.append(el[6])
-    return diagnoses
+    return bodyplaces
 
 #print(max(agelist), min(agelist))
 #for i in listscv[17]:
  #   if i not in diagnoses:
  #       diagnoses.append(i)
-
+print(diagnoselist())
 print(diagnoses)
 print(diagnosecount())
-sussyPicSeperator()
+#sussyPicSeperator()
+x = 0
+dalist = []
+for age in agelist:
+    age = int(age)
+    if age > 16 and age < 30:
+        x += 1
+        dalist.append(age)
+print(x, dalist)
 """
 import matplotlib.pyplot as plt
 

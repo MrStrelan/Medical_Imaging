@@ -4,7 +4,7 @@ from scipy.cluster.vq import whiten
 from scipy.cluster.vq import kmeans
 import pandas as pd
 from maskcreation import randpicture
-
+import os
 from PIL import Image
 
 
@@ -55,7 +55,7 @@ def batmanMethod():
 
 	plt.imshow([dominant_colors])
 	plt.show()
-	return
+	return dominant_colors
 
 
 def find_dominant_color(filename):
@@ -71,4 +71,18 @@ def find_dominant_color(filename):
     dominant_color = sorted_pixels[-1][1]
     return dominant_color
 
-print(find_dominant_color(folderJPG + sumpicture))
+#print(find_dominant_color(folderJPG + sumpicture))
+"""
+for el in os.listdir(".\\Medical_Imaging\\SussyPics\\SCC"):
+	color = find_dominant_color(".\\Medical_Imaging\\SussyPics\\SCC\\" + el)
+	esc_code = f"\033[38;2;{color[0]};{color[1]};{color[2]};{color[3]}m"
+	print(f"{esc_code}{el} \033[0m")
+	print("\n")
+
+
+print('bebr')
+"""
+#batmanMethod()
+#for el in os.listdir(".\\Medical_Imaging\\SussyPics\\SCC"):
+#	print(el)
+
