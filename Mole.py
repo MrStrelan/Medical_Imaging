@@ -3,8 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import transform, morphology
 import cv2
-from skimage.colors import rgb2hsv
-
+#from skimage.colors import rgb2hsv0
 # A class for processing mole images
 class Mole:
     def __init__(self, image_id):
@@ -186,7 +185,20 @@ class Mole:
         plt.ylabel('Frequency')
         plt.show()
 
-    
+    def print_all(self):
+
+        plt.imshow(self.img, cmap='gray')
+        plt.show()
+        plt.imshow(self.mask, cmap='gray')
+        plt.show()
+        plt.imshow(self.perim, cmap='gray')
+        plt.show()
+        plt.imshow(self.seg, cmap='gray')
+        plt.show()
+        return 0
+
+
+    """
     def find_colors(self):
         im3 = self.mask_segm()
         plt.imshow(im3)
@@ -219,3 +231,4 @@ class Mole:
                     if  20 <= h*360 <= 45 and 45/100<= s <= 100/100 and 40/100 <= v <= 65/100:
                         lightBrown += 1
         return count, red, black, white, blueGray, darkBrown, lightBrown
+    """
