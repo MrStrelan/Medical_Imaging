@@ -73,7 +73,7 @@ def featureExtractor(filename):
             print("done")
         else:
             print("file not found")
-    return print("done")d
+    return print("done")
 
 def main():
     with open('dataExtracted.csv', 'a+') as w:

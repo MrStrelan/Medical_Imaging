@@ -157,7 +157,7 @@ class Mole:
 
     #Calculate compactness from area an perimeter
     def compactness_calc(self):
-        compactness = (np.sum(self.perim)*np.sum(self.perim))/4*pi*np.sum(self.mask)
+        compactness = (np.sum(self.perim)*np.sum(self.perim))/(4*pi*np.sum(self.mask))
         return compactness
 
     #RGB to HSV image
