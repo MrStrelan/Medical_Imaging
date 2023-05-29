@@ -12,10 +12,15 @@ def csvwrite(row, file):
 
     return print("done")
 
-firstrow = ["id", "color", "symmetry", "compactness", "diagnosis", "smoker", "inheritance"]
+firstrow = ["id", "color", "symmetry", "compactness",'border', "diagnosis", "smoker", "inheritance"]
 
 def snatchData(id):
-    if isinstance(listscv, list):
+    try:
+        isinstance(listscv, list)
+        
+    except NameError:
+
+        
         with open('metadata.csv', 'r') as r:
             reader_obj = csv.reader(r)
             listscv = []  
@@ -33,12 +38,14 @@ def snatchData(id):
                     print("searching for file..")
                     
     else:
-            for el in listscv:
-                if el[1] == id[:-4]:
-                    return el[2], el[9], el[17], el[24]
+        for el in listscv:
+            if el[1] == id[:-4]:
+                this, a, dumb, solution =el[2], el[9], el[17], el[24]
+                listscv.remove(el)
+                return this, a, dumb, solution
                 
-                else:
-                    print("file not found")
+            else:
+                print("file not found")
 
     return print("This should not be printed. XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
 
@@ -53,7 +60,7 @@ def featureExtractor(filename):
             pic.compactness()
             """
             smoker, inheritance, diagnosis, id = snatchData(el)
-            answlist = [[id, pic.color(), pic.symmetry(), pic.compactness(), diagnosis, smoker, inheritance]]
+            answlist = [[id, pic.color(), pic.symmetry(), pic.compactness(),pic.border(), diagnosis, smoker, inheritance]]
             
             csvwrite(answlist, filename)
             print("done")
