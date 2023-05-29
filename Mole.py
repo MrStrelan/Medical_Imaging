@@ -191,7 +191,7 @@ class Mole:
         """
 
         # Fetch RegionProps - this includes min/mean/max values for color intensity
-        regions = measure.regionprops(segments, intensity_image=self.overlay[:, :, :-1])
+        regions = measure.regionprops(segments, intensity_image=self.overlay[:, :, :3])
         
         # Calculate mean color intensity for each region
         mean_intensity = [region.intensity_mean for region in regions]
@@ -231,14 +231,14 @@ class Mole:
         #Create reverse mask
         opposite_mask = np.logical_not(border).astype(boolean)
 
-        """Uncomment to see the area of border
+        #Uncomment to see the area of border
         plt.imshow(opposite_mask, cmap='gray')
         plt.show()
         im2 = self.img.copy()
         im2[opposite_mask != 1] = 0
         plt.imshow(im2, cmap='gray')
         plt.show()
-        """
+        
         
         # Get slic segments
         segments = segmentation.slic(self.img, n_segments=10, compactness=0.01, sigma=3 , start_label=1, mask=opposite_mask)
@@ -247,9 +247,8 @@ class Mole:
         plt.imshow(segmentation.mark_boundaries(self.img[:, :, :-1], segments))
         plt.show()
         """
-
         # Fetch RegionProps - this includes min/mean/max values for color intensity
-        regions = measure.regionprops(segments, intensity_image=self.img[:, :, :-1])
+        regions = measure.regionprops(segments, intensity_image=self.img[:, :, :3])
         
         # Calculate mean color intensity for each region
         mean_intensity = [region.intensity_mean for region in regions]
