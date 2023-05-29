@@ -20,6 +20,8 @@ class Mole:
         self.seg = self.overlay_segm()
         # Calculate compactness
         self.comp = self.compactness_calc()
+        # Find colours
+        self.colors = self.find_colors()
 
     # Method that loads and prepares image and mask for further processing
     # Input: image id
@@ -233,4 +235,4 @@ class Mole:
                     if  20 <= h*360 <= 45 and 45/100<= s <= 100/100 and 40/100 <= v <= 65/100:
                         lightBrown += 1
         return count, red, black, white, blueGray, darkBrown, lightBrown
-    """
+
