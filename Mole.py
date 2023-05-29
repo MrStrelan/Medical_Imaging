@@ -232,12 +232,12 @@ class Mole:
         opposite_mask = np.logical_not(border).astype(boolean)
 
         #Uncomment to see the area of border
-        plt.imshow(opposite_mask, cmap='gray')
-        plt.show()
+    #    plt.imshow(opposite_mask, cmap='gray')
+     #   plt.show()
         im2 = self.img.copy()
         im2[opposite_mask != 1] = 0
-        plt.imshow(im2, cmap='gray')
-        plt.show()
+      #  plt.imshow(im2, cmap='gray')
+  #      plt.show()
         
         
         # Get slic segments
