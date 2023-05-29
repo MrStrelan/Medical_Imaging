@@ -53,6 +53,7 @@ class Mole:
         max_pixels_in_col = np.max(pixels_in_col)
         # Rotate the mask by 45 degrees until the largest width is found
         max_height_mask = self.mask  
+        rot_img = self.img
         for i in range(1,24):
             rot_mask = transform.rotate(self.mask, 15*i)
             height = np.max(np.sum(rot_mask, axis=0))
