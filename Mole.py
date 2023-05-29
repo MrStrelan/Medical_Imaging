@@ -151,7 +151,7 @@ class Mole:
 
     """
     ---------------------------------- Print functions ----------------------------------
-    """
+    
 
 
     # Function prints out symmetry
@@ -161,12 +161,14 @@ class Mole:
             print("Object is symmetric:", self.symmetry)
         else:
             print("Object is not symmetric:", self.symmetry)
+        return
 
     # Method that displays the calculated perimeter
     def show_per(self):
         
         plt.imshow(self.perim, cmap='gray')
         plt.show()
+        return
 
     def show_seg_mask(self):
 
