@@ -21,12 +21,12 @@ class Mole:
         # Calculate the mole's perimeter
         self.perim = self.perimeter()
         # Calculate the mole's symmetry
-        self.symmetry = self.symmetry()
+        self.symmetry()
         # Fuse the mask and the original picture
         self.overlay = self.overlay_segm()
         # Calculate compactness
         self.comp = self.compactness_calc()
-        self.color = self.color_extraction()
+        self.color_extraction()
         
 
     # Method that loads and prepares image and mask for further processing

@@ -20,26 +20,28 @@ def snatchData(id):
         
     except NameError:
 
-        
+        #if file is not created
         with open('metadata.csv', 'r') as r:
             reader_obj = csv.reader(r)
             listscv = []  
-            diagnoses = []
-            bodyplaces = []
-            # Iterate over each row in the csv file 
-            # using reader object
+            
+            
             for row in reader_obj:
                 listscv.append(row)
+            print("searching for file..")
             for el in listscv:
-                if el[1] == id[-4]:
+                #print(el[24], id)
+                if el[24] == id:
                     print("found!")
                     return el[2], el[9], el[17], el[24]
                 else:
-                    print("searching for file..")
+                    print("...")
                     
     else:
+        #if file is created
+        print("searching for file..")
         for el in listscv:
-            if el[1] == id[:-4]:
+            if el[24] == id:
                 this, a, dumb, solution =el[2], el[9], el[17], el[24]
                 listscv.remove(el)
                 return this, a, dumb, solution
@@ -60,7 +62,12 @@ def featureExtractor(filename):
             pic.compactness()
             """
             smoker, inheritance, diagnosis, id = snatchData(el)
-            answlist = [[id, pic.color(), pic.symmetry(), pic.compactness(),pic.border(), diagnosis, smoker, inheritance]]
+            color = pic.color_extraction()
+            symmetry = pic.symmetry()
+            compactness = pic.comp
+            border = pic.border
+
+            answlist = [id, color, symmetry, compactness, border, diagnosis, smoker, inheritance]
             
             csvwrite(answlist, filename)
             print("done")
