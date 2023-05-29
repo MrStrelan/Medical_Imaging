@@ -1,8 +1,11 @@
 from cmath import pi
+from xmlrpc.client import boolean
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import transform, morphology
+from skimage import transform, morphology,segmentation, measure 
 import cv2
+import colorsys
+
 #from skimage.colors import rgb2hsv0
 # A class for processing mole images
 class Mole:
@@ -10,18 +13,21 @@ class Mole:
         self.id = image_id
         # Load and prepare image and mask
         self.img, self.mask = self.prepare_im()
-        # Find maximum height and rotated mask
-        self.mask, self.high = self.max_height()
+        # Find maximum height and rotate mask
+        self.mask, self.high, self.img = self.max_height()
+        self.border()
+        # Crop mole
+        self.mask, self.img = self.crop_mask()
         # Calculate the mole's perimeter
         self.perim = self.perimeter()
         # Calculate the mole's symmetry
         self.symmetry = self.symmetry()
         # Fuse the mask and the original picture
-        self.seg = self.overlay_segm()
+        self.overlay = self.overlay_segm()
         # Calculate compactness
         self.comp = self.compactness_calc()
-        # Find colours
-        self.colors = self.find_colors()
+        self.color_extraction()
+        
 
     # Method that loads and prepares image and mask for further processing
     # Input: image id
@@ -51,10 +57,11 @@ class Mole:
             rot_mask = transform.rotate(self.mask, 15*i)
             height = np.max(np.sum(rot_mask, axis=0))
             if height > max_pixels_in_col:
+                rot_img = transform.rotate(self.img, 15*i)
                 max_pixels_in_col = height
                 max_height_mask = rot_mask  
                 
-        return max_height_mask, max_pixels_in_col
+        return max_height_mask, max_pixels_in_col, rot_img
 
     # Method that calculates the perimeter of the mole
     # Input: mask of the image
@@ -75,10 +82,9 @@ class Mole:
 
 
         return perimeter_im
-    
-    #counts symmetry proportionally to moles size
-    def symmetry(self):
 
+    #Crops mask by the mole
+    def crop_mask(self):
         # find the indices of the non-zero elements
         nonzero_rows, nonzero_cols = np.nonzero(self.mask)
     
@@ -92,23 +98,28 @@ class Mole:
         col_index=1
         if (max_col-min_col)%2==0:
             col_index = 0
+
         # Extract the subarray containing the non-zero elements
         cut_mask = self.mask[min_row:max_row+row_index, min_col:max_col+col_index]
-        
-        #Flipping image by x and y axes
-        x_flipped = np.flip(cut_mask, axis=0)
-        y_flipped = np.flip(cut_mask, axis=1)
+        cut_img = self.img[min_row:max_row+row_index, min_col:max_col+col_index]
+        return cut_mask, cut_img
 
+    #counts symmetry proportionally to moles size
+    def symmetry(self):
+
+        #Flipping image by x and y axes
+        x_flipped = np.flip(self.mask, axis=0)
+        y_flipped = np.flip(self.mask, axis=1)
         
-        left_area = cut_mask[:,:cut_mask.shape[1]//2]
+        left_area = self.mask[:,:self.mask.shape[1]//2]
         #flipped right half
         right_area = y_flipped[:,:y_flipped.shape[1]//2]
 
-        upper_area = cut_mask[:cut_mask.shape[0]//2,:]
+        upper_area = self.mask[:self.mask.shape[0]//2,:]
         #flipped bottom half
         bottom_area = x_flipped[:x_flipped.shape[0]//2,:]
         
-        #Uncamment and to see how compared halfs look like
+        #Uncomment and to see how compared halfs look like
         #plt.imshow(upper_area, cmap='gray')
         #plt.show()
         #plt.imshow(bottom_area, cmap='gray')
@@ -116,6 +127,7 @@ class Mole:
         
         #actually it asymmetry
         x_symmetry = upper_area-bottom_area
+
         #We make all values positive and equeal because we don't care about intensity of color but only shape
         x_symmetry[x_symmetry != 0] = 1
         y_symmetry = left_area-right_area
@@ -130,19 +142,16 @@ class Mole:
 
         return symmetry_factor
 
-    # Returns picture where eberything besides mask shown as black
+    # Returns picture where everything besides mask shown as black
     def overlay_segm(self):
-        # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
-        # axes[0].imshow(im)
-        # axes[1].imshow(gt, cmap='gray')
-        #fig.tight_layout()
 
         im2 = self.img.copy()
         im2[self.mask == 0] = 0
         
-        # Save the resulting image in a folder called "results"
-        path = '.'
-        plt.imsave(path + '\\Fused_Images\\' + self.id + '_segm.png',im2)
+        # Save the resulting image in a folder called "results" if needed
+        #path = '.'
+        #plt.imsave(path + '\\Fused_Images\\' + self.id + '_segm.png',im2)
+        
         return im2
 
     #Calculate compactness from area an perimeter
@@ -150,10 +159,121 @@ class Mole:
         compactness = (np.sum(self.perim)*np.sum(self.perim))/4*pi*np.sum(self.mask)
         return compactness
 
+    #RGB to HSV image
+    def rgb_to_hsv_image(self):
+        
+        #create np array with original image shape to store hsv values
+        x = np.shape(self.img)[0]
+        y = np.shape(self.img)[1]
+        hsv_values = np.empty((x,y,3))
+
+        #Calcullate hsv values and assign to new array
+        for i in range(np.shape(self.img)[0]):
+            for j in range(np.shape(self.img)[1]):  
+                r, g, b, _ = self.img[i][j]
+                h, s, v = colorsys.rgb_to_hsv(r, g, b)
+                hsv_values[i,j,0] = h
+                hsv_values[i,j,1] = s
+                hsv_values[i,j,2] = v
+
+        return hsv_values
+    
+    #Calculate Standart deviation in colors of different mole regions
+    def color_extraction(self):
+
+        # Get slic segments
+        segments = segmentation.slic(self.img, n_segments=20, compactness=0.01, sigma=3 , start_label=1, mask=self.mask)
+
+        """Uncomment to see the segments
+        plt.imshow(segmentation.mark_boundaries(self.overlay[:, :, :-1], segments))
+        plt.show()
+        """
+
+        # Fetch RegionProps - this includes min/mean/max values for color intensity
+        regions = measure.regionprops(segments, intensity_image=self.overlay[:, :, :-1])
+        
+        # Calculate mean color intensity for each region
+        mean_intensity = [region.intensity_mean for region in regions]
+        
+        #Convert RGB to HSV
+        h = []
+        s = []
+        v = []
+        for i in range(len(mean_intensity)):
+            mean_intensity[i] = colorsys.rgb_to_hsv(mean_intensity[i][0],mean_intensity[i][1],mean_intensity[i][2])
+            h.append(mean_intensity[i][0])
+            s.append(mean_intensity[i][1])
+            v.append(mean_intensity[i][2])
+
+        # Computing Standart deviation
+        h_sd = np.std(np.array(h))
+        s_sd = np.std(np.array(s))
+        v_sd =np.std(np.array(v))
+
+        return [h_sd, s_sd, v_sd]
+
+    def border(self):
+
+
+        #Create reverse mask to use brush in both sides from borders
+        opposite_mask = np.logical_not(self.mask).astype(int)
+
+        # Erode the mask to remove small details
+        brush = morphology.disk(15)
+        inner = morphology.binary_erosion(self.mask, brush)
+        brush = morphology.disk(5)
+        outter = morphology.binary_erosion(opposite_mask, brush)
+
+        # Combine outter and inner perimeter
+        border = inner + outter
+        
+        #Create reverse mask
+        opposite_mask = np.logical_not(border).astype(boolean)
+
+        """Uncomment to see the area of border
+        plt.imshow(opposite_mask, cmap='gray')
+        plt.show()
+        im2 = self.img.copy()
+        im2[opposite_mask != 1] = 0
+        plt.imshow(im2, cmap='gray')
+        plt.show()
+        """
+        
+        # Get slic segments
+        segments = segmentation.slic(self.img, n_segments=10, compactness=0.01, sigma=3 , start_label=1, mask=opposite_mask)
+
+        """Uncomment to see the segments
+        plt.imshow(segmentation.mark_boundaries(self.img[:, :, :-1], segments))
+        plt.show()
+        """
+
+        # Fetch RegionProps - this includes min/mean/max values for color intensity
+        regions = measure.regionprops(segments, intensity_image=self.img[:, :, :-1])
+        
+        # Calculate mean color intensity for each region
+        mean_intensity = [region.intensity_mean for region in regions]
+        
+        #Convert RGB to HSV
+        h = []
+        s = []
+        v = []
+        for i in range(len(mean_intensity)):
+            mean_intensity[i] = colorsys.rgb_to_hsv(mean_intensity[i][0],mean_intensity[i][1],mean_intensity[i][2])
+            h.append(mean_intensity[i][0])
+            s.append(mean_intensity[i][1])
+            v.append(mean_intensity[i][2])
+
+        # Computing Standart deviation
+        h_sd = np.std(np.array(h))
+        s_sd = np.std(np.array(s))
+        v_sd =np.std(np.array(v))
+
+        return [h_sd, s_sd, v_sd]
+
 
     """
     ---------------------------------- Print functions ----------------------------------
-    
+    """
 
 
     # Function prints out symmetry
