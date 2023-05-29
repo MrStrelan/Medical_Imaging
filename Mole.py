@@ -15,13 +15,13 @@ class Mole:
         self.img, self.mask = self.prepare_im()
         # Find maximum height and rotate mask
         self.mask, self.high, self.img = self.max_height()
-        self.border()
+        self.border = self.border()
         # Crop mole
         self.mask, self.img = self.crop_mask()
         # Calculate the mole's perimeter
         self.perim = self.perimeter()
         # Calculate the mole's symmetry
-        self.symmetry = self.symmetry()
+        self.symmetry()
         # Fuse the mask and the original picture
         self.overlay = self.overlay_segm()
         # Calculate compactness
@@ -356,4 +356,4 @@ class Mole:
                     if  20 <= h*360 <= 45 and 45/100<= s <= 100/100 and 40/100 <= v <= 65/100:
                         lightBrown += 1
         return count, red, black, white, blueGray, darkBrown, lightBrown
-    """
+"""
