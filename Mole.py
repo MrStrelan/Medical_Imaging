@@ -262,8 +262,8 @@ class Mole:
         segments = segmentation.slic(self.img, n_segments=10, compactness=0.01, sigma=3 , start_label=1, mask=opposite_mask)
 
         #Uncomment to see the segments
-        plt.imshow(segmentation.mark_boundaries(self.img[:, :, :3], segments))
-        plt.show()
+      #  plt.imshow(segmentation.mark_boundaries(self.img[:, :, :3], segments))
+       
         
         # Fetch RegionProps - this includes min/mean/max values for color intensity
         regions = measure.regionprops(segments, intensity_image=self.img[:, :, :3])
