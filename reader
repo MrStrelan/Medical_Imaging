@@ -7,7 +7,7 @@ import pandas as pd
 
 def readerCSV():
     # Open file
-    with open('Medical_Imaging/metadata.csv') as file_obj:
+    with open('metadata.csv') as file_obj:
         
         # Skips the heading
         # Using next() method
@@ -125,25 +125,32 @@ with open('dataExtracted.csv', 'r') as r:
     listscv = []  
     for row in reader_obj:
         listscv.append(row)
-    #print(listscv)
+#print(listscv)
 
 # divide into healthy and cancerous
 healthy = []
 cancerous = []
 listscv.remove(listscv[0])
+#print(listscv)
 def listscvCleaner():
     for el in listscv:
-        #print(el[5])
-        if el == []:
-            listscv.remove(el)
+        
+        #print(el)
+        if len(el) == 0:
+            #listscv.remove(el)
             continue
         if el[5] == "ACK" or el[5] == "SCC" or el[5] == "MEL":
             cancerous.append(el)
+            #print("printer")
+            continue
         else:
             healthy.append(el)
-        return listscv
-print(len(healthy), len(cancerous))
+            #print("printer2")
+            continue
+        return 
 listscvCleaner()
+print(len(healthy), len(cancerous))
+
 def ZaLooper(mylist, mykey):
 #nested loops for extracting key elements
     dalist = []
@@ -151,12 +158,34 @@ def ZaLooper(mylist, mykey):
         dalist.append(x[mykey])
     return dalist
 
+def listcreator():
+    
+    
+    global HealthySorted
+    HealthySorted = []
+    global CancerousSorted
+    CancerousSorted = []
+    firstrow = ["id", "color", "symmetry", "compactness",'border', "diagnosis", "smoker", "inheritance"]
+    for el in range(len(firstrow)):
+        els = ZaLooper(healthy, el)
+        HealthySorted.append(els)
+      
+    
+    
+        els = ZaLooper(cancerous, el)
+        CancerousSorted.append(els)
+       
 
+    return HealthySorted, CancerousSorted
+print("DEBUG", len(listcreator()[0][0]), len(listcreator()[1][0]))
 
+print(HealthySorted)
 #plt.figure(figsize=(8, 4))
-plt.hist(ZaLooper(listscv, 7), ZaLooper(listscv, 2) , width = 0.8)
+d = {}
+import plotly.graph_objects as go
+import pandas as pd
+from plotly.subplots import make_subplots
 
-plt.show()
 
 
 
@@ -164,18 +193,15 @@ def plotting():
 
  
 
-    #Plot different aspect of healthy to cancerous moles ans save them in a folder
-    #plotting the age of the patients
-    inheritance = []
-    for el in healthy:
-        inheritance.append(int(el[7]))
-    inheritance = np.array(inheritance)
-    plt.hist(inheritance, bins=20)
-    plt.title("Cancerous iheritance of patients")
-
+    fig, axs = plt.subplots(2)
+    fig.suptitle('Vertically stacked subplots')
+    axs[0].plot(HealthySorted[7], HealthySorted[4])
+    #axs[1].plot(x, -y)
+    plt.show()
 
 
 
 
 
     return
+plotting()
