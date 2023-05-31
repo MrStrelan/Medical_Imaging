@@ -1,6 +1,8 @@
 import csv
 import Mole as Molepy
 import os
+global counter
+counter = 0
 def csvwrite(row, file):
    
 
@@ -33,9 +35,11 @@ def snatchData(id):
                 #print(el[24], id)
                 if el[24] == id:
                     print("found!")
+                    
                     return el[2], el[9], el[17], el[24]
+                    
                 else:
-                    print("...")
+                    continue
                     
     else:
         #if file is created
@@ -52,6 +56,7 @@ def snatchData(id):
     return print("This should not be printed. XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
 
 def featureExtractor(filename):
+    global counter
     for el in os.listdir(".\\Images"):
         if "mask_" + el in os.listdir(".\\Masks_png"):
             pic = Molepy.Mole(el[:-4])
@@ -62,6 +67,8 @@ def featureExtractor(filename):
             pic.compactness()
             """
             smoker, inheritance, diagnosis, id = snatchData(el)
+            counter += 1
+            print("writing file", counter)
             color = pic.color_extraction()
             symmetry = pic.symmetry()
             compactness = pic.comp
@@ -70,12 +77,13 @@ def featureExtractor(filename):
             answlist = [id, color, symmetry, compactness, border, diagnosis, smoker, inheritance]
             
             csvwrite(answlist, filename)
-            print("done")
+            
         else:
             print("file not found")
     return print("done")
 
 def main():
+
     with open('dataExtracted.csv', 'a+') as w:
         if w.readline() != firstrow:
             csvwrite(firstrow, w)
@@ -91,7 +99,7 @@ def main():
 
    
 
-    return  print("Success!")
+    return  print("Success!", counter, "files written")
     
 
 

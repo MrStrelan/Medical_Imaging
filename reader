@@ -4,6 +4,8 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import matplotlib.colors as mcolors
+import ast
 
 def readerCSV():
     # Open file
@@ -81,29 +83,7 @@ def diagnoselist():
         agelist.append(el[6])
     return bodyplaces
 
-#print(max(agelist), min(agelist))
-#for i in listscv[17]:
- #   if i not in diagnoses:
- #       diagnoses.append(i)
-#print(diagnoselist())
-#print(diagnoses)
-#print(diagnosecount())
-#sussyPicSeperator()
 """
-x = 0
-dalist = []
-for age in agelist:
-    age = int(age)
-    if age > 16 and age < 30:
-        x += 1
-        dalist.append(age)
-print(x, dalist)
-
-import matplotlib.pyplot as plt
-
-diagnoses = ['NEV', 'BCC', 'ACK', 'SEK', 'SCC', 'MEL']
-counts = diagnosecount()
-
 def make_autopct(values):
     def my_autopct(pct):
         total = sum(values)
@@ -111,11 +91,7 @@ def make_autopct(values):
         return '{v:d}'.format(v=val)
     return my_autopct
 
-fig1, ax1 = plt.subplots()
-ax1.pie(counts, labels=diagnoses, autopct=make_autopct(counts), startangle=90)
-ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 
-plt.show()
 """
 
 
@@ -187,16 +163,44 @@ import pandas as pd
 from plotly.subplots import make_subplots
 
 
+def convert_lists_to_tuples(data):
+    for sublist in data:
+        tuple_of_floats = ast.literal_eval(sublist)
+        data[data.index(sublist)] = tuple_of_floats
+
+    return data
 
 
-def plotting():
+def plotting(hsv_list1, hsv_list2):
 
- 
+    hsv_list1 = convert_lists_to_tuples(hsv_list1)
+    hsv_list2 = convert_lists_to_tuples(hsv_list2)
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[9, 5])
 
-    fig, axs = plt.subplots(2)
-    fig.suptitle('Vertically stacked subplots')
-    axs[0].plot(HealthySorted[7], HealthySorted[4])
-    #axs[1].plot(x, -y)
+    for j, hsv_color in enumerate(hsv_list1):
+        print('Shape of hsv_color:', np.array(hsv_color).shape, "val", hsv_color)
+        print('Shape of hsv_list1:', np.array(hsv_list1).shape)
+        ax1.add_patch(plt.Rectangle((j, 0), 1, 1, color=mcolors.hsv_to_rgb(hsv_color)))
+
+
+    # Plot the first list of HSV colors
+    for j, hsv_color in enumerate(hsv_list1):
+        print(hsv_color, 'printer', j)
+        ax1.add_patch(plt.Rectangle((j, 0), 1, 1, color=mcolors.hsv_to_rgb(hsv_color)))
+
+    ax1.set_xlim(0, len(hsv_list1))
+    ax1.set_ylim(0, 1)
+    ax1.set_title('HSV Color List 1')
+
+    # Plot the second list of HSV colors
+    for j, hsv_color in enumerate(hsv_list2):
+        ax2.add_patch(plt.Rectangle((j, 0), 1, 1, color=mcolors.hsv_to_rgb(hsv_color)))
+
+    ax2.set_xlim(0, len(hsv_list2))
+    ax2.set_ylim(0, 1)
+    ax2.set_title('HSV Color List 2')
+
     plt.show()
 
 
@@ -204,4 +208,7 @@ def plotting():
 
 
     return
-plotting()
+if len(HealthySorted[1]) > 0 and len(CancerousSorted[1]) > 0:
+    plotting(HealthySorted[1], CancerousSorted[1])
+else:
+    print("Empty lists. Cannot plot.")
