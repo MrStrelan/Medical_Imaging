@@ -4,7 +4,7 @@ import Mole
 def main():
 
     mole = Mole.Mole("PAT_21_982_266")
-    #mole.print_all()
+    mole.plot_color_histogramRGB()
     return
 
 main()
