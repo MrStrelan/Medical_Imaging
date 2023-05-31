@@ -22,6 +22,9 @@ import MoleClass as mc
 mole = mc.Mole('PAT_90_219_648')
 mole.perimeter()
 
-"""
+
 import os
 print(os.listdir(".\\Images"))
+
+"""
+
