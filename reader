@@ -1,27 +1,33 @@
 import csv
 import shutil
 import os
-# Open file
-with open('Medical_Imaging/metadata.csv') as file_obj:
-      
-    # Skips the heading
-    # Using next() method
-    heading = next(file_obj)
-      
-    # Create reader object by passing the file 
-    # object to reader method
-    reader_obj = csv.reader(file_obj)
-    listscv = []  
-    diagnoses = []
-    bodyplaces = []
-    # Iterate over each row in the csv file 
-    # using reader object
-    for row in reader_obj:
-        listscv.append(row)
-    
- #   for row in reader_obj:
-  #      listscv.append(row[])
-sussylist = ['MEL', "AK", "SCC"]
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+def readerCSV():
+    # Open file
+    with open('Medical_Imaging/metadata.csv') as file_obj:
+        
+        # Skips the heading
+        # Using next() method
+        heading = next(file_obj)
+        
+        # Create reader object by passing the file 
+        # object to reader method
+        reader_obj = csv.reader(file_obj)
+        listscv = []  
+        diagnoses = []
+        bodyplaces = []
+        # Iterate over each row in the csv file 
+        # using reader object
+        for row in reader_obj:
+            listscv.append(row)
+        
+    #   for row in reader_obj:
+    #      listscv.append(row[])
+    sussylist = ['MEL', "AK", "SCC"]
+    return
 
 def sussyPicSeperator(): #copyies cancerous pics to another folder
 
@@ -38,7 +44,7 @@ def sussyPicSeperator(): #copyies cancerous pics to another folder
     return print("LET'S GOOO!")
 
 
-print(len(listscv))
+#print(len(listscv))
 agelist = []
 
 diagnoselist = ['NEV', 'BCC', 'ACK', 'SEK', 'SCC', 'MEL']
@@ -79,10 +85,11 @@ def diagnoselist():
 #for i in listscv[17]:
  #   if i not in diagnoses:
  #       diagnoses.append(i)
-print(diagnoselist())
-print(diagnoses)
-print(diagnosecount())
+#print(diagnoselist())
+#print(diagnoses)
+#print(diagnosecount())
 #sussyPicSeperator()
+"""
 x = 0
 dalist = []
 for age in agelist:
@@ -91,7 +98,7 @@ for age in agelist:
         x += 1
         dalist.append(age)
 print(x, dalist)
-"""
+
 import matplotlib.pyplot as plt
 
 diagnoses = ['NEV', 'BCC', 'ACK', 'SEK', 'SCC', 'MEL']
@@ -110,3 +117,65 @@ ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 
 plt.show()
 """
+
+
+#read extracted csv file
+with open('dataExtracted.csv', 'r') as r:
+    reader_obj = csv.reader(r)
+    listscv = []  
+    for row in reader_obj:
+        listscv.append(row)
+    #print(listscv)
+
+# divide into healthy and cancerous
+healthy = []
+cancerous = []
+listscv.remove(listscv[0])
+def listscvCleaner():
+    for el in listscv:
+        #print(el[5])
+        if el == []:
+            listscv.remove(el)
+            continue
+        if el[5] == "ACK" or el[5] == "SCC" or el[5] == "MEL":
+            cancerous.append(el)
+        else:
+            healthy.append(el)
+        return listscv
+print(len(healthy), len(cancerous))
+listscvCleaner()
+def ZaLooper(mylist, mykey):
+#nested loops for extracting key elements
+    dalist = []
+    for x in mylist:
+        dalist.append(x[mykey])
+    return dalist
+
+
+
+#plt.figure(figsize=(8, 4))
+plt.hist(ZaLooper(listscv, 7), ZaLooper(listscv, 2) , width = 0.8)
+
+plt.show()
+
+
+
+def plotting():
+
+ 
+
+    #Plot different aspect of healthy to cancerous moles ans save them in a folder
+    #plotting the age of the patients
+    inheritance = []
+    for el in healthy:
+        inheritance.append(int(el[7]))
+    inheritance = np.array(inheritance)
+    plt.hist(inheritance, bins=20)
+    plt.title("Cancerous iheritance of patients")
+
+
+
+
+
+
+    return
