@@ -15,6 +15,7 @@ class Mole:
         self.img, self.mask = self.prepare_im()
         # Find maximum height and rotate mask
         self.mask, self.high, self.img = self.max_height()
+        #Calculate color differences on the border
         self.border = self.border()
         # Crop mole
         self.mask, self.img = self.crop_mask()
@@ -81,6 +82,14 @@ class Mole:
         # Calculate the perimeter by subtracting the cleaned mask from the original mask
         perimeter_im = self.mask - mask_cleaned
 
+        """ Uncomment to see
+        plt.imshow(mask_cleaned, cmap = "gray")
+        plt.show()
+        plt.imshow(self.mask, cmap = "gray")
+        plt.show()
+        plt.imshow(perimeter_im, cmap = "gray")
+        plt.show()
+        """
 
         return perimeter_im
 
@@ -121,17 +130,20 @@ class Mole:
         bottom_area = x_flipped[:x_flipped.shape[0]//2,:]
         
         #Uncomment and to see how compared halfs look like
-        #plt.imshow(upper_area, cmap='gray')
-        #plt.show()
-        #plt.imshow(bottom_area, cmap='gray')
-        #plt.show()
+        """
+        plt.imshow(upper_area, cmap='gray')
+        plt.show()
+        plt.imshow(bottom_area, cmap='gray')
+        plt.show()
+        """
         
         #actually it asymmetry
         x_symmetry = upper_area-bottom_area
+        y_symmetry = left_area-right_area
 
         #We make all values positive and equeal because we don't care about intensity of color but only shape
         x_symmetry[x_symmetry != 0] = 1
-        y_symmetry = left_area-right_area
+
         y_symmetry[y_symmetry != 0] = 1
         
         #We make all values positive and equeal because we don't care about intensity of color but only shape
@@ -185,17 +197,21 @@ class Mole:
         # Get slic segments
         segments = segmentation.slic(self.img, n_segments=20, compactness=0.01, sigma=3 , start_label=1, mask=self.mask)
 
-        """Uncomment to see the segments
-        plt.imshow(segmentation.mark_boundaries(self.overlay[:, :, :-1], segments))
+        #Uncomment to see the segments
+        """
+        plt.imshow(segmentation.mark_boundaries(self.overlay[:, :, :3], segments))
         plt.show()
         """
+        
 
         # Fetch RegionProps - this includes min/mean/max values for color intensity
         regions = measure.regionprops(segments, intensity_image=self.overlay[:, :, :3])
         
+
         # Calculate mean color intensity for each region
         mean_intensity = [region.intensity_mean for region in regions]
         
+
         #Convert RGB to HSV
         h = []
         s = []
@@ -226,27 +242,33 @@ class Mole:
         outter = morphology.binary_erosion(opposite_mask, brush)
 
         # Combine outter and inner perimeter
-        border = inner + outter
+        not_border = inner + outter
         
+        plt.imshow(not_border, cmap='gray')
+        plt.show()
         #Create reverse mask
-        opposite_mask = np.logical_not(border).astype(boolean)
+        opposite_mask = np.logical_not(not_border).astype(boolean)
+
+        plt.imshow(opposite_mask, cmap='gray')
+        plt.show()
 
         #Uncomment to see the area of border
-    #    plt.imshow(opposite_mask, cmap='gray')
-     #   plt.show()
+        """
+        plt.imshow(opposite_mask, cmap='gray')
+        plt.show()
         im2 = self.img.copy()
         im2[opposite_mask != 1] = 0
-      #  plt.imshow(im2, cmap='gray')
-  #      plt.show()
-        
+        plt.imshow(im2, cmap='gray')
+        plt.show()
+        """
         
         # Get slic segments
         segments = segmentation.slic(self.img, n_segments=10, compactness=0.01, sigma=3 , start_label=1, mask=opposite_mask)
 
-        """Uncomment to see the segments
-        plt.imshow(segmentation.mark_boundaries(self.img[:, :, :-1], segments))
+        #Uncomment to see the segments
+        plt.imshow(segmentation.mark_boundaries(self.img[:, :, :3], segments))
         plt.show()
-        """
+        
         # Fetch RegionProps - this includes min/mean/max values for color intensity
         regions = measure.regionprops(segments, intensity_image=self.img[:, :, :3])
         
