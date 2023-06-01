@@ -27,7 +27,7 @@ def normalizeFeatures(features):
 
     return new_features
 
-def splitDataIntoTrainTest(X, y):
+def splitDataIntoTrainTest(X, y, trained):
 
     """
     Wrapper around the scikit function train_test_split.
@@ -40,7 +40,10 @@ def splitDataIntoTrainTest(X, y):
     # Split the given data according to given criteria
     # * random state --> for reproducibility
     # * stratify --> makes sure that the distribution of cancer is in each equal
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1, shuffle=True, stratify=y)
+    if trained == False:
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1, shuffle=True, stratify=y)
+    else:
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1, random_state=1, shuffle=True, stratify=y)
 
     # Return the result
     return X_train, X_test, y_train, y_test
@@ -103,7 +106,6 @@ def evaluateTestData(X_test, y_true, clfs):
     header = ["classifier_name"] + metrics
     # * Build the empty dataframe
     results = pd.DataFrame(columns = header)
-
     # Compute the results
     for name, clf in clfs.items():
         
