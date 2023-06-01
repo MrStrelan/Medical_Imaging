@@ -12,6 +12,7 @@ import json
 
 def test_melonomas(p2data, trained = False):
 
+    templist = []
     moles_df = pd.read_csv(p2data)
     #print(moles_df.head())
     #print(type(moles_df))
@@ -149,8 +150,8 @@ def test_melonomas(p2data, trained = False):
                     model_name = model_name[:-4]
                     #print(model.predict(X_test_adj))
                     results[diagnosis] = f.evaluateTestData(X_test_adj, y_test, loaded_models)
-                    print(results)
-                print(loaded_models)
+                    templist.append(results)
+                
                 
         
 
@@ -170,4 +171,6 @@ def test_melonomas(p2data, trained = False):
         sns.scatterplot(x="symmetry", y="border_s", data=X_train_with_Y, hue=diagnosis)
     plt.show()
     """
+    for el in templist:
+        print(el)
     return results

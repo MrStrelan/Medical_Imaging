@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.feature_selection import mutual_info_classif, SelectKBest
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import cross_validate
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import numpy as np
 
 def normalizeFeatures(features):
@@ -102,7 +102,7 @@ def evaluateTestData(X_test, y_true, clfs):
 
     # Build a dataframe where you will save the results
     # * Define metrics that will be measured
-    metrics = ["accuracy", "precision", "recall"]
+    metrics = ["accuracy", "precision", "recall", "f1"]
     header = ["classifier_name"] + metrics
     # * Build the empty dataframe
     results = pd.DataFrame(columns = header)
@@ -122,7 +122,10 @@ def evaluateTestData(X_test, y_true, clfs):
         # * Recall
         rec = recall_score(y_true, y_pred)
 
-        result = [acc, prec, rec]
+        # * F1 score
+        f1 = f1_score(y_true, y_pred)
+
+        result = [acc, prec, rec, f1]
 
         # Create a new record representing the given classifier and corresponding metrics
         new_record = pd.DataFrame([[name] + result], columns = header)
