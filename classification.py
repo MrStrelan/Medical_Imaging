@@ -125,8 +125,8 @@ def test_melonomas(p2data, trained = False):
                     with open(".\\models\\" + filename, "wb") as file:
                         pickle.dump(model, file)
 
-            with open('data.txt', 'w') as file:
-                json.dump(miscellaniousDict, file)#Save as json
+  #          with open('data.txt', 'w') as file:
+  #              json.dump(miscellaniousDict, file)#Save as json
 
 
                 results[diagnosis] = f.evaluateTestData(X_test_adj, y_test, CLFS_trained)
@@ -136,8 +136,8 @@ def test_melonomas(p2data, trained = False):
                 loaded_models = {}
                 results = {}
 
-                with open('data.txt', 'r') as file:
-                    loaded_data = json.load(file) #Dictionary is opened here
+               # with open('data.txt', 'r') as file:
+                #    loaded_data = json.load(file) #Dictionary is opened here
 
                 for model_name in os.listdir(".\\models"):
                     filename = f"{model_name}"  # Specify the filename for each model
@@ -147,11 +147,15 @@ def test_melonomas(p2data, trained = False):
 
                 for model_name, model in loaded_models.items():
                     model_name = model_name[:-4]
-
+                    #print(model.predict(X_test_adj))
+                    results[diagnosis] = f.evaluateTestData(X_test_adj, y_test, loaded_models)
+                    print(results)
                 print(loaded_models)
-                results[diagnosis] = f.evaluateTestData(X_test_adj, y_test, loaded_models)
+                
         
-    print(miscellaniousDict)
+
+
+    #print(miscellaniousDict)
     """Uncomment to see main parameters corelation
     plt.figure(figsize=(10, 5))
     if diagnosis == "NEV":
