@@ -83,16 +83,6 @@ def diagnoselist():
         agelist.append(el[6])
     return bodyplaces
 
-"""
-def make_autopct(values):
-    def my_autopct(pct):
-        total = sum(values)
-        val = int(round(pct*total/100.0))
-        return '{v:d}'.format(v=val)
-    return my_autopct
-
-
-"""
 
 
 #read extracted csv file
@@ -127,7 +117,7 @@ def listscvCleaner():
 listscvCleaner()
 print(len(healthy), len(cancerous))
 
-def ZaLooper(mylist, mykey):
+def ZaLooper(mylist, mykey): 
 #nested loops for extracting key elements
     dalist = []
     for x in mylist:

@@ -1,3 +1,5 @@
 PyQt6
 Pillow
 opencv-python
+pickle
+sklearn

@@ -116,18 +116,13 @@ def test_melonomas(p2data, trained = False):
                     "DTC": DecisionTreeClassifier(random_state=0, max_depth=5).fit(X_train_adj, y_train)
                 }
 
-                miscellaniousDict = {}
-                miscellaniousDict.update({diagnosis: CLFS_trained})
-                
+              
 
                 for model_name, model in CLFS_trained.items():
                     filename = f"{model_name}.pkl"  # Specify the filename for each model
 
                     with open(".\\models\\" + filename, "wb") as file:
                         pickle.dump(model, file)
-
-  #          with open('data.txt', 'w') as file:
-  #              json.dump(miscellaniousDict, file)#Save as json
 
 
                 results[diagnosis] = f.evaluateTestData(X_test_adj, y_test, CLFS_trained)
@@ -137,8 +132,7 @@ def test_melonomas(p2data, trained = False):
                 loaded_models = {}
                 results = {}
 
-               # with open('data.txt', 'r') as file:
-                #    loaded_data = json.load(file) #Dictionary is opened here
+             
 
                 for model_name in os.listdir(".\\models"):
                     filename = f"{model_name}"  # Specify the filename for each model
