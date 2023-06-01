@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import ast
 import functions as f
+from sklearn import svm
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 import seaborn as sns
 from sklearn.decomposition import PCA
@@ -10,10 +13,6 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 p2data = "dataExtracted.csv"
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 moles_df = pd.read_csv(p2data)
 #print(moles_df.head())
 #print(type(moles_df))
@@ -26,13 +25,6 @@ moles_df=moles_df.dropna()
 moles_df = moles_df.drop(['id'],axis=1)
 # Drop Smoking because we don't have enough data on smoking
 moles_df = moles_df.drop(['smoker'],axis=1)
-=======
-# Read the data from the CSV file into a pandas DataFrame
-moles_raw = pd.read_csv(p2data)
-=======
-# Read the data from the CSV file into a pandas DataFrame
-moles_raw = pd.read_csv(p2data)
-=======
 # Read the data from the CSV file into a pandas DataFrame
 moles_raw = pd.read_csv(p2data)
 
@@ -40,49 +32,13 @@ moles_raw = pd.read_csv(p2data)
 print(moles_raw.head())
 print(type(moles_raw))
 
-# Select columns of interest from the DataFrame
-columns_of_interest = ["color", "symmetry", "compactness", "border", "diagnosis", "smoker", "inheritance"]
-moles_df = moles_raw.loc[:, columns_of_interest]
-
-# Replace "." with missing values (NaN) in the DataFrame
-moles_df = moles_df.replace(".", np.nan)
-
-# Drop rows containing missing values
-moles_df = moles_df.dropna()
->>>>>>> aaf081375771e11f5417844bc73ce7e02cfad36f
-
-# Print the first few rows of the DataFrame and its type
-print(moles_raw.head())
-print(type(moles_raw))
-
-# Select columns of interest from the DataFrame
-columns_of_interest = ["color", "symmetry", "compactness", "border", "diagnosis", "smoker", "inheritance"]
-moles_df = moles_raw.loc[:, columns_of_interest]
-
-# Replace "." with missing values (NaN) in the DataFrame
-moles_df = moles_df.replace(".", np.nan)
-
-# Drop rows containing missing values
-moles_df = moles_df.dropna()
->>>>>>> aaf081375771e11f5417844bc73ce7e02cfad36f
-
-# Print the first few rows of the DataFrame and its type
-print(moles_raw.head())
-print(type(moles_raw))
-
-# Select columns of interest from the DataFrame
-columns_of_interest = ["color", "symmetry", "compactness", "border", "diagnosis", "smoker", "inheritance"]
-moles_df = moles_raw.loc[:, columns_of_interest]
-
 # Replace "." with missing values (NaN) in the DataFrame
 moles_df = moles_df.replace(".", np.nan)
 
 # Drop rows containing missing values
 moles_df = moles_df.dropna()
 
->>>>>>> aaf081375771e11f5417844bc73ce7e02cfad36f
 # Convert string columns to lists of floats
-
 # Convert 'border' column to lists of floats using ast.literal_eval
 moles_df['border'] = moles_df['border'].apply(lambda x: ast.literal_eval(x))
 
@@ -96,13 +52,9 @@ border_split.columns = ['border_h', 'border_s', 'border_v']
 # Split the 'color' column into separate columns ('color_h', 'color_s', 'color_v')
 color_split = moles_df['color'].apply(pd.Series)
 color_split.columns = ['color_h', 'color_s', 'color_v']
-
 # Merge the split columns ('border' and 'color') with the original DataFrame
 moles_df = pd.concat([moles_df.drop(['border', 'color'], axis=1), border_split, color_split], axis=1)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 diagnosis_groups = moles_df.groupby("diagnosis")
 
 datasets = {}
@@ -114,6 +66,12 @@ for diagnosis, group_df in diagnosis_groups:
     dropped_column = moles_df["diagnosis"]
     datasets[diagnosis] = moles_df.drop("diagnosis", axis=1)
     
+#Select and build classifiers
+CLFS = {
+    "linear_svc": svm.LinearSVC(max_iter = 5000),
+    "knn5": KNeighborsClassifier(n_neighbors=5),
+    "DTC": DecisionTreeClassifier(random_state=0, max_depth=5)
+}
 
 # Access the individual datasets using the diagnosis as the key
 for diagnosis, dataset in datasets.items():
@@ -121,70 +79,65 @@ for diagnosis, dataset in datasets.items():
     print(f"Dataset for diagnosis '{diagnosis}':")
     #Normalising our data
     moles_data = f.normalizeFeatures(dataset)
-    
-    #result_df = pd.DataFrame(False, index=dropped_column.index, columns=dropped_column.columns)
-    # Set values to True where "diagnosis" matches the given value
-    #result_df["result"] = diagnosis["diagnosis"] == given_value
-
-    # Print the resulting DataFrame
-    #print("Here",result_df)
+    #Extracting values that we will build classifier on
     columns_with_features = list(moles_data.columns[:])
-    moles_data['Type'] = diagnosis
-    if diagnosis != "MEL":
-        X_train, X_test, y_train, y_test = f.splitDataIntoTrainTest(moles_data[columns_with_features], moles_data.iloc[:, 9])
-    print(type(X_train))
-    print(X_train)
+    #Adding back column with type deleted for normalisation
+    moles_data['Type'] = dropped_column
+    #Setting Type value to true if mole matches Mole we are building model now for
+    moles_data['Type'] = moles_data['Type'].apply(lambda x: True if x == diagnosis else False)
+    X_train, X_test, y_train, y_test = f.splitDataIntoTrainTest(moles_data[columns_with_features], moles_data.iloc[:, 9])
+
     X_train_with_Y = X_train.copy()
     X_train_with_Y[diagnosis] = y_train
-    sns.pairplot(X_train_with_Y, hue=diagnosis, height=3, diag_kind="hist");
-    plt.show()
+
+    """Uncomment to see allfeatures corelation
+    #sns.pairplot(X_train_with_Y, hue=diagnosis, height=3, diag_kind="hist");
+    #plt.show()
     """
+
     # Get feature scores for melanoma data set
-    feature_scores_ker, selector_ker = featureScores(X_train_ker, y_train_ker, k=2)
+    feature_scores, selector = f.featureScores(X_train, y_train, k=2)
 
     # Get no. of features
-    features_ker = len(feature_scores_ker)
+    features = len(feature_scores)
 
     # Visualize feature scores
-    plt.bar(np.arange(0,features_ker), feature_scores_ker, width=.2)
-    plt.xticks(np.arange(0,features_ker), list(X_train_ker.columns), rotation='vertical')
+    #Uncoment to see features differences
+    """
+    plt.bar(np.arange(0,features), feature_scores, width=.2)
+    plt.xticks(np.arange(0,features), list(X_train.columns), rotation='vertical')
     plt.show()
-
-    # Select the two best features based on the selector
-    X_train_ker_adj = selector_ker.transform(X_train_ker)
-    X_test_ker_adj = selector_ker.transform(X_test_ker)
-    print("\n")
     """
 
+    # Select the two best features based on the selector
+    X_train_adj = selector.transform(X_train)
+    X_test_adj = selector.transform(X_test)
+    
+    f.crossValidate(X_train_adj, y_train, CLFS)
+    
+    #Evaluate the results - TEST DATA
+    CLFS_trained_ker = {
+        "linear_svc": svm.LinearSVC(max_iter = 5000).fit(X_train_adj, y_train),
+        "knn5": KNeighborsClassifier(n_neighbors=5).fit(X_train_adj, y_train),
+        "DTC": DecisionTreeClassifier(random_state=0, max_depth=5).fit(X_train_adj, y_train)
+    }
+    
+    f.evaluateTestData(X_test_adj, y_test, CLFS_trained_ker)
+    
+#'color_h', 'color_s', 'color_v','border_h', 'border_s', 'border_v',symmetry,compactness,inheritance
+    
 
-
-
-=======
-# Select columns with numerical values from the DataFrame
-moles_data = moles_df.select_dtypes(np.number)
-
-=======
-# Select columns with numerical values from the DataFrame
-moles_data = moles_df.select_dtypes(np.number)
-
->>>>>>> aaf081375771e11f5417844bc73ce7e02cfad36f
-=======
-# Select columns with numerical values from the DataFrame
-moles_data = moles_df.select_dtypes(np.number)
-
->>>>>>> aaf081375771e11f5417844bc73ce7e02cfad36f
-# Normalize the features in the DataFrame using a custom function normalizeFeatures
-moles_data = f.normalizeFeatures(moles_data)
-
-# Get the column names of the features
-columns_with_features = list(moles_data.columns[:])
-
-# Split the data into training and testing sets using a custom function splitDataIntoTrainTest
-X_train_mel, X_test_mel, y_train_mel, y_test_mel = f.splitDataIntoTrainTest(moles_data[columns_with_features], moles_data.iloc[:, 0])
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> aaf081375771e11f5417844bc73ce7e02cfad36f
-=======
->>>>>>> aaf081375771e11f5417844bc73ce7e02cfad36f
-=======
->>>>>>> aaf081375771e11f5417844bc73ce7e02cfad36f
+    plt.figure(figsize=(10, 5))
+    if diagnosis == "NEV":
+        sns.scatterplot(x="inheritance", y="color_h", data=X_train_with_Y, hue=diagnosis)
+    elif diagnosis == "ACK":
+        sns.scatterplot(x="inheritance", y="border_h", data=X_train_with_Y, hue=diagnosis)
+    elif diagnosis == "SCC":
+        sns.scatterplot(x="inheritance", y="border_h", data=X_train_with_Y, hue=diagnosis)
+    elif diagnosis == "BCC":
+        sns.scatterplot(x="border_v", y="color_v", data=X_train_with_Y, hue=diagnosis)
+    elif diagnosis == "MEL":
+        sns.scatterplot(x="symmetry", y="border_s", data=X_train_with_Y, hue=diagnosis)
+    plt.show()
+    #Change to folder that you like
+    #plt.savefig("figures/model_selection")
