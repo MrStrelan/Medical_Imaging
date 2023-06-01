@@ -23,7 +23,7 @@ def snatchData(id, metadata_file):
     except NameError:
 
         #if file is not created
-        with open(metadata, 'r') as r:
+        with open(metadata_file, 'r') as r:
             reader_obj = csv.reader(r)
             listscv = []  
             

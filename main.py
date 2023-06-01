@@ -2,18 +2,21 @@
 #import Mole
 #import writer.py
 #import classification.py
-import writer.py as w
+import writer as w
 
-datacsv = "metadata.csv"
-molepng = "PAT_21_982_266.png"
-molemask = "mask_PAT_21_982_266.png"
+datacsv = "metadata.csv" #Path to metadata.csv
 
-
-
-
+#Make sure your folder paths are the same
+molepngFolder = ".\\Images"
+molemaskFolder = ".\\Masks_png"
 
 
-def main(data, mask, mole):
+
+
+
+
+
+def main(data):
 
     w.main(data)
 
@@ -23,4 +26,4 @@ def main(data, mask, mole):
 
 
 if __name__ == "__main__":
-    main(datacsv, molemask, datacsv)
+    main(datacsv)
