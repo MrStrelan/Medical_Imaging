@@ -1,9 +1,26 @@
 
-import Mole
+#import Mole
+#import writer.py
+#import classification.py
+import writer.py as w
 
-def main():
+datacsv = "metadata.csv"
+molepng = "PAT_21_982_266.png"
+molemask = "mask_PAT_21_982_266.png"
 
-    mole = Mole.Mole("PAT_21_982_266")
+
+
+
+
+
+def main(data, mask, mole):
+
+    w.main(data)
+
     return
 
-main()
+
+
+
+if __name__ == "__main__":
+    main(datacsv, molemask, datacsv)
