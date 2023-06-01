@@ -8,6 +8,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 import os
 import pickle
+import json
 
 def test_melonomas(p2data, trained = False):
 
@@ -124,7 +125,10 @@ def test_melonomas(p2data, trained = False):
                     with open(".\\models\\" + filename, "wb") as file:
                         pickle.dump(model, file)
 
-    
+            with open('data.txt', 'w') as file:
+                json.dump(miscellaniousDict, file)#Save as json
+
+
                 results[diagnosis] = f.evaluateTestData(X_test_adj, y_test, CLFS_trained)
             
             if trained == True:
@@ -132,7 +136,8 @@ def test_melonomas(p2data, trained = False):
                 loaded_models = {}
                 results = {}
 
-                
+                with open('data.txt', 'r') as file:
+                    loaded_data = json.load(file) #Dictionary is opened here
 
                 for model_name in os.listdir(".\\models"):
                     filename = f"{model_name}"  # Specify the filename for each model
