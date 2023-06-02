@@ -10,6 +10,7 @@ import os
 import pickle
 import json
 from sklearn import preprocessing
+import seaborn as sns
 
 # Define a function to extract elements from lists
 def extract_elements_from_list(string):
@@ -45,11 +46,11 @@ def test_melanomas(data, trained=False):
 
 
 
-    if not trained:
+    if trained == False:
         
         CLFS = {
-            "linear_svc": svm.LinearSVC(max_iter=5000),
-            "knn5": KNeighborsClassifier(n_neighbors=5),
+            "linear_svc": svm.LinearSVC(max_iter=10),
+            "knn5": KNeighborsClassifier(n_neighbors=2),
             "DTC": DecisionTreeClassifier(random_state=0, max_depth=5)
         }
         results = {}
@@ -64,7 +65,9 @@ def test_melanomas(data, trained=False):
         for model_name, model in CLFS.items():
             model.fit(X_train, y_train)
             fitted_models[model_name] = model  # Store the fitted model
-                
+        
+        sns.pairplot(dataset, hue='Type', diag_kind='hist')
+        plt.show()
 
         dumpFolder = ".\\testData\\"
 
@@ -77,13 +80,16 @@ def test_melanomas(data, trained=False):
 
         for modelName, model in fitted_models.items():
             results[modelName] = f.evaluateTestData(X_test, y_test, model)
+            with open(".\\models\\" + modelName + ".pkl", "wb") as file:
+                pickle.dump(model, file)
             
-
+        #gel = list(f.featureScores(X_train, y_train, 5))
         return results
 
     
-    if trained:
+    if trained == True:
         loaded_models = {}
+        dumpFolder = ".\\testData"
 
         for model_name in os.listdir(".\\models"):
             filename = f"{model_name}"  # Specify the filename for each model
@@ -94,11 +100,12 @@ def test_melanomas(data, trained=False):
             print(model_name, "loaded")
 
         # Load the test data
-        
-        with open(dumpFolder +'X_test.pkl', 'wb') as file1:
-            X_test = pickle.load(X_test, file1)
-        with open(dumpFolder + 'y_test.pkl', 'wb') as file2:
-            y_test = pickle.load(y_test, file2)
+        X_test = []
+        y_test = []
+       # with open(dumpFolder +'X_test.pkl', 'wb') as file1:
+        #    X_test = pickle.load(file1)
+       # with open(dumpFolder + 'y_test.pkl', 'wb') as file2:
+        #    y_test = pickle.load(file2)
 
         print("data prepared")
         results = {}

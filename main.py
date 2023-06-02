@@ -31,7 +31,7 @@ def main(data, Trained, MetaDataWritten, datacsv):
     for key, val in results.items():
         print(key, " : ", val)
         print("\n")
-
+    
     return print("Finished!")
 
 
