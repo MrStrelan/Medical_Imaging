@@ -12,7 +12,7 @@ dataExtracted = "dataExtracted.csv" #Path to dataExtracted.csv
 molepngFolder = "\\Images"
 molemaskFolder = "\\Masks_png"
 
-Trained = True #Set to True if you want to train the model
+Trained = False #Set to True if you want to train the model
 MetaDataWritten = True #Set to false if you want to extract metadata from dataset
 
 
