@@ -6,26 +6,21 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import cross_validate
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import numpy as np
+import ast
 
-def normalizeFeatures(features):
+def normalizeFeatures(df):
+    scaler = preprocessing.StandardScaler()
 
-    """
-    Normalizes features to a common scale using Sklearn preproccessing module.
-    :features: pandas dataframe with selected features
-    :return: dataframe with scaled features
-    """
+    for column in df.columns:
+        if column == 'diagnosis':
+            continue  # Skip normalization for the 'diagnosis' column
 
-    # Fit scaler on the data
-    scaler = preprocessing.StandardScaler().fit(features)
+        values = df[column].values.reshape(-1, 1)
+        normalized_values = scaler.fit_transform(values)
+        df[column] = normalized_values.flatten()
 
-    # Apply the scaler to the data
-    new_features = scaler.transform(features) # Returns 2D numpy array
+    return df
 
-    # Transform the numpy array back to DF
-
-    new_features = pd.DataFrame(data = new_features, columns = list(features.columns))
-
-    return new_features
 
 def splitDataIntoTrainTest(X, y, trained):
 
@@ -99,36 +94,47 @@ def crossValidate(X_train, y_train, clfs):
     return results
 
 def evaluateTestData(X_test, y_true, clfs):
-
     # Build a dataframe where you will save the results
-    # * Define metrics that will be measured
-    metrics = ["accuracy", "precision", "recall", "f1"]
-    header = ["classifier_name"] + metrics
-    # * Build the empty dataframe
-    results = pd.DataFrame(columns = header)
-    # Compute the results
+    results = pd.DataFrame(columns=["classifier_name", "accuracy", "precision", "recall", "f1"])
+
+    # Check if clfs is a single classifier or a dictionary-like collection of classifiers
+    if hasattr(clfs, 'predict'):
+        clfs = {'results': clfs}
+
+    # Compute the results for each classifier
     for name, clf in clfs.items():
-        
         # Get the results
         y_pred = clf.predict(X_test)
 
         # Compute the metrics
-        # * Accuracy
         acc = accuracy_score(y_true, y_pred)
-        
-        # * Precision
         prec = precision_score(y_true, y_pred)
-
-        # * Recall
         rec = recall_score(y_true, y_pred)
-
-        # * F1 score
         f1 = f1_score(y_true, y_pred)
 
-        result = [acc, prec, rec, f1]
-
         # Create a new record representing the given classifier and corresponding metrics
-        new_record = pd.DataFrame([[name] + result], columns = header)
+        new_record = pd.DataFrame([[name, acc, prec, rec, f1]], columns=["classifier_name", "accuracy", "precision", "recall", "f1"])
         results = results.append(new_record, ignore_index=True)
-    
+
     return results
+
+def prepareTestData(dataset):
+    # Select the desired features for evaluation
+    features = ['color', 'symmetry', 'compactness', 'border', 'smoker', 'inheritance']
+
+    # Map mole types to dangerous (1) and healthy (0) categories
+    diagnosis_mapping = {'NEV': 0, 'BCC': 0, 'SEK': 0, 'AK': 1, 'SCC': 1, 'MEL': 1}
+    dataset['diagnosis'] = dataset['diagnosis'].map(diagnosis_mapping)
+
+    # Convert the string representation of the list to a list of floats in the 'colours' column
+    dataset['color'] = dataset['color'].apply(lambda x: ast.literal_eval(x))
+
+    # Select the desired columns from the dataset
+    dataset = dataset[features + ['diagnosis']]
+
+    # Split the dataset into input features (X) and target variable (y)
+    X_test = dataset.drop('diagnosis', axis=1).values
+    y_test = dataset['diagnosis'].values.astype(float)
+    print(X_test, 'bebr')
+
+    return X_test, y_test
