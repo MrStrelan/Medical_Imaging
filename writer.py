@@ -32,7 +32,7 @@ def snatchData(id, metadata_file):
                 listscv.append(row)
             print("searching for file..")
             for el in listscv:
-                #print(el[24], id)
+                #print(el[24], id) #debugging purposes
                 if el[24] == id:
                     print("found!")
                     

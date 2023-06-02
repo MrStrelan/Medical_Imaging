@@ -1,6 +1,6 @@
 import os
 
-#This file was used to rename the images to match the masks, so that they masks have "_mask" in their name
+#This file was used to rename the images to match the masks, so that masks have "_mask" in their name
 
 datafolder = "C:\\Users\\mrass\\Downloads\\Uni_pics"
 

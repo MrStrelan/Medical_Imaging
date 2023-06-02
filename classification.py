@@ -126,7 +126,7 @@ def test_melonomas(p2data, trained = False):
 
 
                 results[diagnosis] = f.evaluateTestData(X_test_adj, y_test, CLFS_trained)
-            
+                print(results)
             if trained == True:
                     
                 loaded_models = {}
@@ -144,7 +144,7 @@ def test_melonomas(p2data, trained = False):
                     model_name = model_name[:-4]
                     #print(model.predict(X_test_adj))
                     results[diagnosis] = f.evaluateTestData(X_test_adj, y_test, loaded_models)
-                    templist.append(results)
+                   # templist.append(results)
                 
                 
         
@@ -165,6 +165,9 @@ def test_melonomas(p2data, trained = False):
         sns.scatterplot(x="symmetry", y="border_s", data=X_train_with_Y, hue=diagnosis)
     plt.show()
     """
-    for el in templist:
-        print(el)
+    #results[diagnosis] = f.evaluateTestData(X_test_adj, y_test, CLFS_trained)
+    templist.append(results)
+    #for el in templist:
+        #print(el)
+    print(y_test)
     return results
