@@ -1,6 +1,6 @@
 
 #import Mole
-#import writer.py
+##import writer.py
 #import classification.py
 import writer as w
 import classification as c
@@ -23,11 +23,14 @@ MetaDataWritten = True #Set to false if you want to extract metadata from datase
 def main(data, Trained, MetaDataWritten, datacsv):
 
     if MetaDataWritten == True:
-        c.test_melonomas(data, Trained)
+        results =c.test_melanomas(data, Trained)
     if MetaDataWritten == False:
         w.main(datacsv)
-        c.test_melonomas(data, Trained)
-
+        results =c.test_melanomas(data, Trained)
+    
+    for key, val in results.items():
+        print(key, " : ", val)
+        print("\n")
 
     return print("Finished!")
 
