@@ -167,7 +167,7 @@ def test_melonomas(p2data, trained = False):
     """
     #results[diagnosis] = f.evaluateTestData(X_test_adj, y_test, CLFS_trained)
     templist.append(results)
-    #for el in templist:
-        #print(el)
-    print(y_test)
+    for el in templist:
+        print(el)
+    
     return results
