@@ -5,31 +5,27 @@
 import writer as w
 import classification as c
 
-datacsv = "metadata.csv" #Path to metadata.csv
-dataExtracted = "dataExtracted.csv" #Path to dataExtracted.csv
 
-#Make sure your folder paths are the same
-molepngFolder = "\\Images"
-molemaskFolder = "\\Masks_png"
+def main():
 
-Trained = False #Set to True if you want to train the model
-MetaDataWritten = True #Set to false if you want to extract metadata from dataset
+    datacsv = "metadata.csv" #Path to metadata.csv
+    dataExtracted = "dataExtracted.csv" #Path to dataExtracted.csv
 
+    #Make sure your folder paths are the same
+    molepngFolder = "\\Images"
+    molemaskFolder = "\\Masks_png"
 
-
-
-
-
-def main(data, Trained, MetaDataWritten, datacsv):
+    Trained = False #Set to True if you want to train the model
+    MetaDataWritten = True #Set to false if you want to extract metadata from dataset
 
     if MetaDataWritten == True:
-        results =c.test_melanomas(data, Trained)
+        results =c.test_melanomas(dataExtracted, Trained)
     if MetaDataWritten == False:
         w.main(datacsv)
-        results =c.test_melanomas(data, Trained)
+        results =c.test_melanomas(dataExtracted, Trained)
     
     for key, val in results.items():
-        print(key, " : ", val)
+        print(val)
         print("\n")
     
     return print("Finished!")
@@ -38,4 +34,4 @@ def main(data, Trained, MetaDataWritten, datacsv):
 
 
 if __name__ == "__main__":
-    main(dataExtracted, Trained, MetaDataWritten, datacsv)
+    main()

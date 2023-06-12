@@ -38,7 +38,7 @@ def splitDataIntoTrainTest(X, y, trained):
     if trained == False:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1, shuffle=True, stratify=y)
     else:
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1, random_state=1, shuffle=True, stratify=y)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.99, random_state=1, shuffle=True, stratify=y)
 
     # Return the result
     return X_train, X_test, y_train, y_test
@@ -110,8 +110,7 @@ def evaluateTestData(X_test, y_true, clfs):
         acc = accuracy_score(y_true, y_pred)
         prec = precision_score(y_true, y_pred)
         rec = recall_score(y_true, y_pred)
-        f1 = f1_score(y_true, y_pred)
-
+        f1 = f1_score(y_true, y_pred,average='macro')
         # Create a new record representing the given classifier and corresponding metrics
         new_record = pd.DataFrame([[name, acc, prec, rec, f1]], columns=["classifier_name", "accuracy", "precision", "recall", "f1"])
         results = results.append(new_record, ignore_index=True)

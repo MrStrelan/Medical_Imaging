@@ -8,8 +8,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 import os
 import pickle
-import json
-from sklearn import preprocessing
 import seaborn as sns
 
 # Define a function to extract elements from lists
@@ -27,7 +25,7 @@ def test_melanomas(data, trained=False):
     # Apply the function to the column and add the extracted elements as new columns
     dataset[['color_h', 'color_s', 'color_v']] = dataset['color'].apply(extract_elements_from_list).apply(pd.Series)
     dataset[['border_h', 'border_s', 'border_v']] = dataset['border'].apply(extract_elements_from_list).apply(pd.Series)
-    print(dataset)
+    #print(dataset)
     
     # Create a new 'Type' column based on the diagnosis
     dataset['Type'] = dataset['diagnosis'].apply(lambda x: True if x in ['ACK', 'SCC', 'MEL'] else False)
@@ -41,33 +39,29 @@ def test_melanomas(data, trained=False):
     X = dataset.drop(columns='Type')
     y = dataset['Type']
     
-
-
-
-
+    X = f.normalizeFeatures(X)
 
     if trained == False:
         
         CLFS = {
-            "linear_svc": svm.LinearSVC(max_iter=10),
-            "knn5": KNeighborsClassifier(n_neighbors=2),
+            "linear_svc": svm.LinearSVC(max_iter=5000),
+            "knn5": KNeighborsClassifier(n_neighbors=5),
             "DTC": DecisionTreeClassifier(random_state=0, max_depth=5)
         }
+
         results = {}
         fitted_models = {}
-        X_test = []  # Initialize X_test with an empty list
-        y_test = []  # Initialize y_test with an empty list
-
         
-        X = f.normalizeFeatures(dataset)
-        X_train, X_test, y_train, y_test = f.splitDataIntoTrainTest(X, y, trained=False)
-        print(X_train.shape, X_test.shape)
+        
+        X_train, X_test, y_train, y_test = f.splitDataIntoTrainTest(X, y, trained)
+        
         for model_name, model in CLFS.items():
             model.fit(X_train, y_train)
             fitted_models[model_name] = model  # Store the fitted model
         
-        sns.pairplot(dataset, hue='Type', diag_kind='hist')
-        plt.show()
+        #UNCOMENT TO SEE PAIRPLOT
+        #sns.pairplot(dataset, hue='Type', diag_kind='hist')
+        #plt.show()
 
         dumpFolder = ".\\testData\\"
 
@@ -79,10 +73,10 @@ def test_melanomas(data, trained=False):
 
 
         for modelName, model in fitted_models.items():
-            results[modelName] = f.evaluateTestData(X_test, y_test, model)
+            
             with open(".\\models\\" + modelName + ".pkl", "wb") as file:
                 pickle.dump(model, file)
-            
+        results[modelName] = f.evaluateTestData(X_test, y_test, fitted_models)    
         #gel = list(f.featureScores(X_train, y_train, 5))
         return results
 
@@ -100,19 +94,16 @@ def test_melanomas(data, trained=False):
             print(model_name, "loaded")
 
         # Load the test data
-        X_test = []
-        y_test = []
-       # with open(dumpFolder +'X_test.pkl', 'wb') as file1:
+        #X_test = []
+        #y_test = []
+        # with open(dumpFolder +'X_test.pkl', 'wb') as file1:
         #    X_test = pickle.load(file1)
-       # with open(dumpFolder + 'y_test.pkl', 'wb') as file2:
+        # with open(dumpFolder + 'y_test.pkl', 'wb') as file2:
         #    y_test = pickle.load(file2)
 
         print("data prepared")
         results = {}
 
-        for model_name, model in loaded_models.items():
-            model_name = model_name[:-4]
-            print(model)
-            results[model_name] = f.evaluateTestData(X_test, y_test, loaded_models)
+        results[model_name] = f.evaluateTestData(X, y, loaded_models)
 
         return results
