@@ -15,15 +15,27 @@ def main():
     molepngFolder = "\\Images"
     molemaskFolder = "\\Masks_png"
 
-    Trained = False #Set to True if you want to train the model
+    Trained = True #Set to True if you want to train the model
     MetaDataWritten = True #Set to false if you want to extract metadata from dataset
 
     if MetaDataWritten == True:
-        results =c.test_melanomas(dataExtracted, Trained)
+        if Trained == False:
+            results =c.test_melanomas(dataExtracted, Trained)
+        else:
+            results, mole_evaluation =c.test_melanomas(dataExtracted, Trained)
     if MetaDataWritten == False:
         w.main(datacsv)
-        results =c.test_melanomas(dataExtracted, Trained)
+        if Trained == False:
+            results =c.test_melanomas(dataExtracted, Trained)
+        else:
+            results, mole_evaluation =c.test_melanomas(dataExtracted, Trained)
     
+    if Trained == True:
+        for key, val in mole_evaluation.items():
+            print("Classifier ", key," evaluation of given dataset:")
+            print(val)
+            print("\n")
+
     for key, val in results.items():
         print(val)
         print("\n")

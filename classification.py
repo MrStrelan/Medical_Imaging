@@ -17,7 +17,6 @@ def extract_elements_from_list(string):
     # Return the extracted elements
     return lst[0], lst[1], lst[2]
 
-
 def test_melanomas(data, trained=False):
     # Load the dataset from the CSV file
     dataset = pd.read_csv(data)
@@ -76,9 +75,13 @@ def test_melanomas(data, trained=False):
             
             with open(".\\models\\" + modelName + ".pkl", "wb") as file:
                 pickle.dump(model, file)
-        results[modelName] = f.evaluateTestData(X_test, y_test, fitted_models)    
+  
         #gel = list(f.featureScores(X_train, y_train, 5))
+
+        results[modelName] = f.evaluateTestData(X_test, y_test, fitted_models)  
         return results
+
+    
 
     
     if trained == True:
@@ -93,17 +96,10 @@ def test_melanomas(data, trained=False):
             
             print(model_name, "loaded")
 
-        # Load the test data
-        #X_test = []
-        #y_test = []
-        # with open(dumpFolder +'X_test.pkl', 'wb') as file1:
-        #    X_test = pickle.load(file1)
-        # with open(dumpFolder + 'y_test.pkl', 'wb') as file2:
-        #    y_test = pickle.load(file2)
-
         print("data prepared")
         results = {}
-
         results[model_name] = f.evaluateTestData(X, y, loaded_models)
 
-        return results
+        evaluation = f.predictData(X, loaded_models)
+
+        return results, evaluation

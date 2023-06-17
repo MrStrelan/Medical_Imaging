@@ -89,7 +89,7 @@ def crossValidate(X_train, y_train, clfs):
         
         # Create a new record representing the given classifier and corresponding metrics
         new_record = pd.DataFrame([[name] + result], columns = header)
-        results = results.append(new_record, ignore_index=True)
+        results = results.append(new_record, ignoreindex=True)
 
     return results
 
@@ -115,6 +115,23 @@ def evaluateTestData(X_test, y_true, clfs):
         new_record = pd.DataFrame([[name, acc, prec, rec, f1]], columns=["classifier_name", "accuracy", "precision", "recall", "f1"])
         results = results.append(new_record, ignore_index=True)
 
+    return results
+
+def predictData(X, clfs):
+
+    # Check if clfs is a single classifier or a dictionary-like collection of classifiers
+    if hasattr(clfs, 'predict'):
+        clfs = {'results': clfs}
+
+    
+    results ={}
+    # Compute the results for each classifier
+    for name, clf in clfs.items():
+        # Get the results
+        y_pred = clf.predict(X)
+        # Create a new record representing the given classifier and corresponding metrics
+        results[name] = y_pred
+        
     return results
 
 def prepareTestData(dataset):
