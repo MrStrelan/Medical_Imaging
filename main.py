@@ -7,7 +7,6 @@ import classification as c
 
 
 def main():
-
     datacsv = "metadata.csv" #Path to metadata.csv
     dataExtracted = "dataExtracted.csv" #Path to dataExtracted.csv
 

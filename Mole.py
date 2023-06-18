@@ -35,7 +35,7 @@ class Mole:
     # Output: image and mask
     def prepare_im(self):
         # Set path to image and mask directories
-        path = '.'
+        path = '.\\Medical_Imaging'
         # Load image and scale it down by a factor of 4
         im = plt.imread(path + "\\Images\\" + self.id + '.png')
         im = transform.resize(im, (im.shape[0] // 4, im.shape[1] // 4), anti_aliasing=True)
@@ -170,6 +170,7 @@ class Mole:
     #Calculate compactness from area an perimeter
     def compactness_calc(self):
         compactness = (np.sum(self.perim)*np.sum(self.perim))/(4*pi*np.sum(self.mask))
+        print("Compactness = ",compactness)
         return compactness
 
     #RGB to HSV image
@@ -285,6 +286,11 @@ class Mole:
         h_sd = np.std(np.array(h))
         s_sd = np.std(np.array(s))
         v_sd =np.std(np.array(v))
+
+        print("Standart deviation:")
+        print("Hue  - ", h_sd)
+        print("Saturation  - ", s_sd)
+        print("Value - ", v_sd)
 
         return [h_sd, s_sd, v_sd]
 
