@@ -35,7 +35,7 @@ class Mole:
     # Output: image and mask
     def prepare_im(self):
         # Set path to image and mask directories
-        path = '.\\Medical_Imaging'
+        path = '.'
         # Load image and scale it down by a factor of 4
         im = plt.imread(path + "\\Images\\" + self.id + '.png')
         im = transform.resize(im, (im.shape[0] // 4, im.shape[1] // 4), anti_aliasing=True)

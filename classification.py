@@ -26,11 +26,16 @@ def test_melanomas(data, trained=False):
     dataset[['border_h', 'border_s', 'border_v']] = dataset['border'].apply(extract_elements_from_list).apply(pd.Series)
     #print(dataset)
     
+    # replace "." to missing value
+    dataset=dataset.replace(".", np.nan)
+    # drop all rows containing missing value
+    dataset=dataset.dropna()
+
     # Create a new 'Type' column based on the diagnosis
     dataset['Type'] = dataset['diagnosis'].apply(lambda x: True if x in ['ACK', 'SCC', 'MEL'] else False)
 
     # Drop unnecessary columns
-    columns_to_drop = ['id', 'diagnosis', 'smoker', 'inheritance', 'color', 'border']
+    columns_to_drop = ['id', 'diagnosis', 'smoker', 'color', 'border']
     dataset.drop(columns=columns_to_drop, inplace=True)
 
     # Separate features (X) and target variable (y) from the datasets
@@ -59,8 +64,8 @@ def test_melanomas(data, trained=False):
             fitted_models[model_name] = model  # Store the fitted model
         
         #UNCOMENT TO SEE PAIRPLOT
-        #sns.pairplot(dataset, hue='Type', diag_kind='hist')
-        #plt.show()
+        sns.pairplot(dataset, hue='Type', diag_kind='hist')
+        plt.show()
 
         dumpFolder = ".\\testData\\"
 
@@ -76,13 +81,22 @@ def test_melanomas(data, trained=False):
             with open(".\\models\\" + modelName + ".pkl", "wb") as file:
                 pickle.dump(model, file)
   
-        #gel = list(f.featureScores(X_train, y_train, 5))
+
+        # Get feature scores for melanoma data set
+
+        #feature_scores, selector = f.featureScores(X_train, y_train, k=2)
+           
+        #Uncoment to see features differences
+        """
+        plt.bar(np.arange(0,features), feature_scores, width=.2)
+        plt.xticks(np.arange(0,features), list(X_train.columns), rotation='vertical')
+        plt.show()
+        """
 
         results[modelName] = f.evaluateTestData(X_test, y_test, fitted_models)  
         return results
 
     
-
     
     if trained == True:
         loaded_models = {}
