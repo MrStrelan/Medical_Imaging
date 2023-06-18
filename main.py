@@ -20,12 +20,12 @@ MetaDataWritten = False #Set to false if you want to extract metadata from datas
 
 
 
-def main(data, Trained, MetaDataWritten):
+def main(data, Trained, MetaDataWritten, datacsv):
 
     if MetaDataWritten == True:
         c.test_melonomas(data, Trained)
     if MetaDataWritten == False:
-        w.main(data)
+        w.main(datacsv)
         c.test_melonomas(data, Trained)
 
 
@@ -35,4 +35,4 @@ def main(data, Trained, MetaDataWritten):
 
 
 if __name__ == "__main__":
-    main(dataExtracted, Trained, MetaDataWritten)
+    main(dataExtracted, Trained, MetaDataWritten, datacsv)
