@@ -64,8 +64,8 @@ def test_melanomas(data, trained=False):
             fitted_models[model_name] = model  # Store the fitted model
         
         #UNCOMENT TO SEE PAIRPLOT
-        sns.pairplot(dataset, hue='Type', diag_kind='hist')
-        plt.show()
+        #sns.pairplot(dataset, hue='Type', diag_kind='hist')
+        #plt.show()
 
         dumpFolder = ".\\testData\\"
 
